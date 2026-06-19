@@ -1,0 +1,298 @@
+/* ============================================================
+   LANDING PAGE — RadioSaaS
+   ============================================================ */
+
+.landing {
+  min-height: 100vh;
+  background: #f8fafc;
+  color: #1a1a2e;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* Hero */
+.landing-hero {
+  background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+  color: #fff;
+  padding: 80px 24px 100px;
+  text-align: center;
+}
+
+.landing-hero-content {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.landing-hero h1 {
+  font-size: 3rem;
+  font-weight: 900;
+  margin-bottom: 16px;
+  letter-spacing: -1px;
+}
+
+.landing-subtitle {
+  font-size: 1.4rem;
+  font-weight: 600;
+  opacity: 0.95;
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+.landing-desc {
+  font-size: 1.05rem;
+  opacity: 0.8;
+  max-width: 520px;
+  margin: 0 auto 32px;
+  line-height: 1.6;
+}
+
+.landing-ctas {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.landing-btn-primario {
+  background: #fff;
+  color: #1565C0;
+  font-weight: 700;
+  padding: 14px 32px;
+  border-radius: 30px;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+.landing-btn-primario:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+
+.landing-btn-secundario {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  font-weight: 600;
+  padding: 14px 28px;
+  border-radius: 30px;
+  font-size: 1rem;
+  text-decoration: none;
+  border: 1px solid rgba(255,255,255,0.3);
+  transition: background 0.2s;
+}
+.landing-btn-secundario:hover {
+  background: rgba(255,255,255,0.25);
+}
+
+/* Seções */
+.landing-section {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 80px 24px;
+  text-align: center;
+}
+
+.landing-section h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+  color: #1a1a2e;
+}
+
+/* Features grid */
+.landing-features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 40px;
+  text-align: left;
+}
+
+.landing-feature-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.landing-feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+.landing-feature-icon {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.landing-feature-card h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #1565C0;
+}
+
+.landing-feature-card p {
+  font-size: 0.92rem;
+  color: #555;
+  line-height: 1.5;
+}
+
+/* Planos */
+.landing-planos {
+  background: #f0f4f8;
+  max-width: 100%;
+  padding: 80px 24px;
+}
+
+.landing-planos-sub {
+  color: #666;
+  font-size: 1.05rem;
+  margin-bottom: 40px;
+}
+
+.landing-planos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.landing-plano-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 36px 28px;
+  text-align: center;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  position: relative;
+  transition: transform 0.2s;
+}
+.landing-plano-card:hover {
+  transform: translateY(-4px);
+}
+
+.landing-plano-card.destaque {
+  border: 3px solid #1565C0;
+  box-shadow: 0 8px 32px rgba(21, 101, 192, 0.15);
+  transform: scale(1.03);
+}
+.landing-plano-card.destaque:hover {
+  transform: scale(1.05);
+}
+
+.landing-plano-badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1565C0;
+  color: #fff;
+  padding: 4px 16px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.landing-plano-card h3 {
+  font-size: 1.3rem;
+  font-weight: 800;
+  margin-bottom: 16px;
+  color: #1a1a2e;
+}
+
+.landing-plano-preco {
+  margin-bottom: 24px;
+}
+.preco-cifrao {
+  font-size: 1.1rem;
+  font-weight: 600;
+  vertical-align: top;
+  color: #666;
+}
+.preco-valor {
+  font-size: 2.8rem;
+  font-weight: 900;
+  color: #1565C0;
+  line-height: 1;
+}
+.preco-periodo {
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.landing-plano-features {
+  list-style: none;
+  text-align: left;
+  margin-bottom: 28px;
+}
+.landing-plano-features li {
+  padding: 6px 0;
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.landing-plano-features li.ativo {
+  color: #333;
+}
+.landing-plano-features li.ativo span {
+  color: #2e7d32;
+  font-weight: 700;
+}
+.landing-plano-features li.inativo {
+  color: #bbb;
+}
+.landing-plano-features li.inativo span {
+  color: #ddd;
+}
+
+.landing-plano-btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: #1565C0;
+  color: #fff;
+  transition: opacity 0.2s;
+}
+.landing-plano-btn:hover {
+  opacity: 0.9;
+}
+
+/* Footer */
+.landing-footer {
+  text-align: center;
+  padding: 40px 24px;
+  color: #888;
+  font-size: 0.9rem;
+}
+.landing-footer-sub {
+  font-size: 0.8rem;
+  margin-top: 6px;
+  color: #aaa;
+}
+
+/* Responsivo */
+@media (max-width: 900px) {
+  .landing-features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .landing-planos-grid {
+    grid-template-columns: 1fr;
+    max-width: 400px;
+  }
+  .landing-plano-card.destaque {
+    transform: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .landing-hero h1 { font-size: 2.2rem; }
+  .landing-subtitle { font-size: 1.1rem; }
+  .landing-features-grid { grid-template-columns: 1fr; }
+}

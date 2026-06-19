@@ -1,0 +1,832 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
+import { useAuth } from '../hooks/useAuth';
+import { temFeature, planoNecessario } from '../lib/planos';
+import { UpgradeBadge } from './UpgradeBadge';
+import {
+  NOTICIAS as DEFAULT_NOTICIAS,
+  PROGRAMACAO as DEFAULT_PROGRAMACAO,
+  PATROCINADORES as DEFAULT_PATROCINADORES,
+  BANNERS_PREMIUM as DEFAULT_BANNERS,
+} from '../data/config';
+
+const DIAS_LABEL = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+
+// ============================================================
+// Hook para carregar dados da rádio do Supabase
+// ============================================================
+export function useAdminData(fallbackNoticias, fallbackProgramacao, fallbackPatrocinadores, fallbackBanner) {
+  return {
+    noticias: (fallbackNoticias && fallbackNoticias.length > 0) ? fallbackNoticias : DEFAULT_NOTICIAS,
+    programacao: (fallbackProgramacao && Object.keys(fallbackProgramacao).length > 0) ? fallbackProgramacao : DEFAULT_PROGRAMACAO,
+    patrocinadores: (fallbackPatrocinadores && fallbackPatrocinadores.length > 0) ? fallbackPatrocinadores : DEFAULT_PATROCINADORES,
+    banner: (fallbackBanner && fallbackBanner.length > 0) ? fallbackBanner : DEFAULT_BANNERS,
+  };
+}
+
+// ============================================================
+// PAINEL ADMIN COM AUTENTICAÇÃO REAL
+// ============================================================
+export function Admin({ onClose, radioSlug, plano = 'free' }) {
+  const { user, loading: authLoading, signIn, signUp, signOut, error: authError } = useAuth();
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [loginMsg, setLoginMsg] = useState('');
+
+  // Admin state
+  const [aba, setAba] = useState('aparencia');
+  const [salvo, setSalvo] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [radioId, setRadioId] = useState(null);
+
+  // Dados editáveis
+  const [noticias, setNoticias] = useState([]);
+  const [programacao, setProgramacao] = useState({});
+  const [patrocinadores, setPatrocinadores] = useState([]);
+  const [locutores, setLocutores] = useState([]);
+  const [radioInfo, setRadioInfo] = useState({});
+  const [diaSel, setDiaSel] = useState(new Date().getDay());
+
+  // Carrega dados da rádio quando logado
+  useEffect(() => {
+    if (!user) return;
+    loadRadioData();
+  }, [user]);
+
+  async function loadRadioData() {
+    const slug = radioSlug || 'maraja';
+
+    // Busca rádio
+    const { data: radio } = await supabase
+      .from('radios')
+      .select('*')
+      .eq('slug', slug)
+      .single();
+
+    if (!radio) return;
+    setRadioId(radio.id);
+    setRadioInfo(radio);
+
+    // Se a rádio não tem owner, vincula ao usuário logado
+    if (!radio.owner_id && user) {
+      await supabase.from('radios').update({ owner_id: user.id }).eq('id', radio.id);
+    }
+
+    // Carrega programação
+    const { data: prog } = await supabase
+      .from('programacao')
+      .select('*')
+      .eq('radio_id', radio.id)
+      .order('ordem');
+
+    if (prog) {
+      const grouped = {};
+      prog.forEach((p) => {
+        if (!grouped[p.dia_semana]) grouped[p.dia_semana] = [];
+        grouped[p.dia_semana].push({ id: p.id, time: p.horario, show: p.programa, locutor: p.locutor });
+      });
+      setProgramacao(grouped);
+    }
+
+    // Carrega locutores
+    const { data: locs } = await supabase
+      .from('locutores')
+      .select('*')
+      .eq('radio_id', radio.id);
+    if (locs) setLocutores(locs);
+
+    // Carrega notícias
+    const { data: nots } = await supabase
+      .from('noticias')
+      .select('*')
+      .eq('radio_id', radio.id)
+      .order('created_at', { ascending: false });
+    if (nots) setNoticias(nots);
+
+    // Carrega patrocinadores
+    const { data: pats } = await supabase
+      .from('patrocinadores')
+      .select('*')
+      .eq('radio_id', radio.id)
+      .order('ordem');
+    if (pats) setPatrocinadores(pats);
+  }
+
+  // ---- Login ----
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoginLoading(true);
+    setLoginMsg('');
+
+    if (isSignUp) {
+      const u = await signUp(email, senha);
+      if (u) setLoginMsg('Conta criada! Verifique seu email para confirmar.');
+    } else {
+      await signIn(email, senha);
+    }
+    setLoginLoading(false);
+  };
+
+  // ---- Salvar tudo ----
+  const handleSalvar = async () => {
+    if (!radioId) return;
+    setSaving(true);
+
+    try {
+      // Salva info da rádio
+      await supabase.from('radios').update({
+        nome: radioInfo.nome,
+        frequencia: radioInfo.frequencia,
+        whatsapp: radioInfo.whatsapp,
+        historia: radioInfo.historia,
+        tema: radioInfo.tema,
+        updated_at: new Date().toISOString(),
+      }).eq('id', radioId);
+
+      // Salva programação — deleta e reinsere
+      await supabase.from('programacao').delete().eq('radio_id', radioId);
+      const progInserts = [];
+      Object.entries(programacao).forEach(([dia, items]) => {
+        items.forEach((item, idx) => {
+          progInserts.push({
+            radio_id: radioId,
+            dia_semana: parseInt(dia),
+            horario: item.time,
+            programa: item.show,
+            locutor: item.locutor || '',
+            ordem: idx,
+          });
+        });
+      });
+      if (progInserts.length > 0) {
+        await supabase.from('programacao').insert(progInserts);
+      }
+
+      // Salva notícias — deleta e reinsere
+      await supabase.from('noticias').delete().eq('radio_id', radioId);
+      if (noticias.length > 0) {
+        await supabase.from('noticias').insert(
+          noticias.map((n) => ({
+            radio_id: radioId,
+            titulo: n.titulo,
+            resumo: n.resumo || '',
+            img_url: n.img_url || n.img || '',
+            destaque: !!n.destaque,
+          }))
+        );
+      }
+
+      // Salva patrocinadores — deleta e reinsere
+      await supabase.from('patrocinadores').delete().eq('radio_id', radioId);
+      if (patrocinadores.length > 0) {
+        await supabase.from('patrocinadores').insert(
+          patrocinadores.map((p, idx) => ({
+            radio_id: radioId,
+            nome: p.nome,
+            slogan: p.slogan || '',
+            cor: p.cor || '#1565C0',
+            href: p.href || '#',
+            emoji: p.emoji || '⭐',
+            ordem: idx,
+          }))
+        );
+      }
+
+      // Salva locutores — deleta e reinsere
+      await supabase.from('locutores').delete().eq('radio_id', radioId);
+      if (locutores.length > 0) {
+        await supabase.from('locutores').insert(
+          locutores.map((l) => ({
+            radio_id: radioId,
+            nome: l.nome,
+            funcao: l.funcao || '',
+            programas: l.programas || [],
+            descricao: l.descricao || '',
+            foto_url: l.foto_url || '',
+          }))
+        );
+      }
+
+      setSalvo(true);
+      setTimeout(() => setSalvo(false), 2500);
+    } catch (err) {
+      alert('Erro ao salvar: ' + err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // ---- Upload de imagem ----
+  const uploadImage = async (file, folder = 'general') => {
+    const ext = file.name.split('.').pop();
+    const fileName = `${user.id}/${folder}/${Date.now()}.${ext}`;
+
+    const { data, error } = await supabase.storage
+      .from('media')
+      .upload(fileName, file, { upsert: true });
+
+    if (error) {
+      alert('Erro no upload: ' + error.message);
+      return null;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('media')
+      .getPublicUrl(data.path);
+
+    return publicUrl;
+  };
+
+  // ---- Notícias helpers ----
+  const updateNoticia = (idx, campo, valor) => {
+    const arr = [...noticias];
+    arr[idx] = { ...arr[idx], [campo]: valor };
+    setNoticias(arr);
+  };
+  const addNoticia = () => setNoticias([...noticias, { titulo: '', resumo: '', img_url: '', destaque: false }]);
+  const removeNoticia = (idx) => setNoticias(noticias.filter((_, i) => i !== idx));
+
+  // ---- Programação helpers ----
+  const updateProg = (dia, idx, campo, valor) => {
+    const dia_arr = [...(programacao[dia] || [])];
+    dia_arr[idx] = { ...dia_arr[idx], [campo]: valor };
+    setProgramacao({ ...programacao, [dia]: dia_arr });
+  };
+  const addProg = (dia) => {
+    const arr = [...(programacao[dia] || [])];
+    arr.push({ time: '00:00 – 00:00', show: '', locutor: '' });
+    setProgramacao({ ...programacao, [dia]: arr });
+  };
+  const removeProg = (dia, idx) => {
+    const arr = (programacao[dia] || []).filter((_, i) => i !== idx);
+    setProgramacao({ ...programacao, [dia]: arr });
+  };
+
+  // ---- Patrocinadores helpers ----
+  const updatePat = (idx, campo, valor) => {
+    const arr = [...patrocinadores];
+    arr[idx] = { ...arr[idx], [campo]: valor };
+    setPatrocinadores(arr);
+  };
+  const addPat = () => setPatrocinadores([...patrocinadores, { nome: '', slogan: '', cor: '#1565C0', href: '#', emoji: '⭐' }]);
+  const removePat = (idx) => setPatrocinadores(patrocinadores.filter((_, i) => i !== idx));
+
+  // ---- Locutores helpers ----
+  const updateLocutor = (idx, campo, valor) => {
+    const arr = [...locutores];
+    arr[idx] = { ...arr[idx], [campo]: valor };
+    setLocutores(arr);
+  };
+  const addLocutor = () => setLocutores([...locutores, { nome: '', funcao: '', programas: [], descricao: '', foto_url: '' }]);
+  const removeLocutor = (idx) => setLocutores(locutores.filter((_, i) => i !== idx));
+
+  const handleLocutorFoto = async (idx, file) => {
+    const url = await uploadImage(file, 'locutores');
+    if (url) updateLocutor(idx, 'foto_url', url);
+  };
+
+  // ============================================================
+  // TELA DE LOGIN
+  // ============================================================
+  if (authLoading) {
+    return (
+      <div className="admin-overlay">
+        <div className="admin-login">
+          <button className="admin-close" onClick={onClose} aria-label="Fechar">✕</button>
+          <div className="admin-login-logo">📻</div>
+          <p>Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="admin-overlay">
+        <div className="admin-login">
+          <button className="admin-close" onClick={onClose} aria-label="Fechar">✕</button>
+          <div className="admin-login-logo">🎙️</div>
+          <h2>Painel Admin</h2>
+          <p>{isSignUp ? 'Criar conta' : 'Entrar com email e senha'}</p>
+          <form onSubmit={handleLogin}>
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="admin-input"
+              autoFocus
+              required
+            />
+            <input
+              type="password"
+              placeholder="Senha"
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              className={`admin-input${authError ? ' erro' : ''}`}
+              required
+              minLength={6}
+            />
+            {authError && <span className="admin-erro">{authError}</span>}
+            {loginMsg && <span className="admin-msg-success">{loginMsg}</span>}
+            <button type="submit" className="admin-btn-primario" disabled={loginLoading}>
+              {loginLoading ? 'Aguarde...' : isSignUp ? 'Criar Conta' : 'Entrar'}
+            </button>
+          </form>
+          <button
+            className="admin-btn-link"
+            onClick={() => { setIsSignUp(!isSignUp); setLoginMsg(''); }}
+          >
+            {isSignUp ? 'Já tenho conta → Entrar' : 'Criar conta nova'}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ============================================================
+  // PAINEL PRINCIPAL
+  // ============================================================
+  return (
+    <div className="admin-overlay">
+      <div className="admin-panel">
+
+        {/* Header */}
+        <div className="admin-header">
+          <div className="admin-header-info">
+            <span className="admin-header-icon">🎙️</span>
+            <div>
+              <strong>Painel Admin</strong>
+              <span>{user.email}</span>
+            </div>
+          </div>
+          <div className="admin-header-actions">
+            <button
+              className={`admin-btn-salvar${salvo ? ' salvo' : ''}`}
+              onClick={handleSalvar}
+              disabled={saving}
+            >
+              {salvo ? '✓ Salvo!' : saving ? 'Salvando...' : '💾 Salvar'}
+            </button>
+            <button className="admin-btn-logout" onClick={signOut} title="Sair">
+              🚪
+            </button>
+            <button className="admin-close" onClick={onClose} aria-label="Fechar">✕</button>
+          </div>
+        </div>
+
+        {/* Abas */}
+        <div className="admin-abas">
+          {[
+            { id: 'aparencia',      label: '🎨 Aparência' },
+            { id: 'noticias',       label: '📰 Notícias' },
+            { id: 'programacao',    label: '🕐 Programação' },
+            { id: 'locutores',      label: '🎙️ Locutores' },
+            { id: 'patrocinadores', label: '✨ Patrocinadores' },
+          ].map((a) => (
+            <button
+              key={a.id}
+              className={`admin-aba${aba === a.id ? ' ativa' : ''}`}
+              onClick={() => setAba(a.id)}
+            >
+              {a.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Conteúdo */}
+        <div className="admin-conteudo">
+
+          {/* ===== APARÊNCIA ===== */}
+          {aba === 'aparencia' && (
+            <div>
+              <div className="admin-secao-header">
+                <h3>Aparência</h3>
+              </div>
+
+              {!temFeature(plano, 'coresCustom') && (
+                <UpgradeBadge planoNecessario={planoNecessario('coresCustom')} />
+              )}
+
+              {/* Cores */}
+              <div className={`admin-card${!temFeature(plano, 'coresCustom') ? ' admin-feature-locked' : ''}`}>
+                <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: 12 }}>🎨 Cores</h4>
+                <div className="admin-prog-row">
+                  <div style={{ flex: 1 }}>
+                    <label className="admin-field-label">Primária</label>
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                      <input type="color" value={(radioInfo.tema?.corPrimaria) || '#1565C0'} onChange={(e) => setRadioInfo({ ...radioInfo, tema: { ...radioInfo.tema, corPrimaria: e.target.value } })} style={{ width: 32, height: 32, border: 'none', borderRadius: 6, cursor: 'pointer' }} />
+                      <input className="admin-input" value={(radioInfo.tema?.corPrimaria) || '#1565C0'} onChange={(e) => setRadioInfo({ ...radioInfo, tema: { ...radioInfo.tema, corPrimaria: e.target.value } })} style={{ flex: 1, marginBottom: 0 }} />
+                    </div>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label className="admin-field-label">Secundária</label>
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                      <input type="color" value={(radioInfo.tema?.corSecundaria) || '#0D47A1'} onChange={(e) => setRadioInfo({ ...radioInfo, tema: { ...radioInfo.tema, corSecundaria: e.target.value } })} style={{ width: 32, height: 32, border: 'none', borderRadius: 6, cursor: 'pointer' }} />
+                      <input className="admin-input" value={(radioInfo.tema?.corSecundaria) || '#0D47A1'} onChange={(e) => setRadioInfo({ ...radioInfo, tema: { ...radioInfo.tema, corSecundaria: e.target.value } })} style={{ flex: 1, marginBottom: 0 }} />
+                    </div>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label className="admin-field-label">Fundo</label>
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                      <input type="color" value={(radioInfo.tema?.corFundo) || '#F0F4F8'} onChange={(e) => setRadioInfo({ ...radioInfo, tema: { ...radioInfo.tema, corFundo: e.target.value } })} style={{ width: 32, height: 32, border: 'none', borderRadius: 6, cursor: 'pointer' }} />
+                      <input className="admin-input" value={(radioInfo.tema?.corFundo) || '#F0F4F8'} onChange={(e) => setRadioInfo({ ...radioInfo, tema: { ...radioInfo.tema, corFundo: e.target.value } })} style={{ flex: 1, marginBottom: 0 }} />
+                    </div>
+                  </div>
+                </div>
+                <div className="admin-prog-row" style={{ marginTop: 10 }}>
+                  <div style={{ flex: 1 }}>
+                    <label className="admin-field-label">Cards</label>
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                      <input type="color" value={(radioInfo.tema?.corCards) || '#FFFFFF'} onChange={(e) => setRadioInfo({ ...radioInfo, tema: { ...radioInfo.tema, corCards: e.target.value } })} style={{ width: 32, height: 32, border: 'none', borderRadius: 6, cursor: 'pointer' }} />
+                      <input className="admin-input" value={(radioInfo.tema?.corCards) || '#FFFFFF'} onChange={(e) => setRadioInfo({ ...radioInfo, tema: { ...radioInfo.tema, corCards: e.target.value } })} style={{ flex: 1, marginBottom: 0 }} />
+                    </div>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label className="admin-field-label">Texto</label>
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                      <input type="color" value={(radioInfo.tema?.corTexto) || '#1a1a1a'} onChange={(e) => setRadioInfo({ ...radioInfo, tema: { ...radioInfo.tema, corTexto: e.target.value } })} style={{ width: 32, height: 32, border: 'none', borderRadius: 6, cursor: 'pointer' }} />
+                      <input className="admin-input" value={(radioInfo.tema?.corTexto) || '#1a1a1a'} onChange={(e) => setRadioInfo({ ...radioInfo, tema: { ...radioInfo.tema, corTexto: e.target.value } })} style={{ flex: 1, marginBottom: 0 }} />
+                    </div>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label className="admin-field-label">Arredondamento</label>
+                    <select
+                      className="admin-input"
+                      value={(radioInfo.tema?.borderRadius) || '15px'}
+                      onChange={(e) => setRadioInfo({ ...radioInfo, tema: { ...radioInfo.tema, borderRadius: e.target.value } })}
+                      style={{ marginBottom: 0 }}
+                    >
+                      <option value="0px">Quadrado</option>
+                      <option value="6px">Sutil</option>
+                      <option value="10px">Médio</option>
+                      <option value="15px">Padrão</option>
+                      <option value="20px">Arredondado</option>
+                      <option value="30px">Muito arredondado</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Fontes */}
+              <div className={`admin-card${!temFeature(plano, 'fontesCustom') ? ' admin-feature-locked' : ''}`}>
+                <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: 12 }}>🔤 Fontes</h4>
+                <div className="admin-prog-row">
+                  <div style={{ flex: 1 }}>
+                    <label className="admin-field-label">Fonte Principal</label>
+                    <select
+                      className="admin-input"
+                      value={(radioInfo.tema?.fontePrincipal) || ''}
+                      onChange={(e) => setRadioInfo({ ...radioInfo, tema: { ...radioInfo.tema, fontePrincipal: e.target.value } })}
+                      style={{ marginBottom: 0 }}
+                    >
+                      <option value="">Padrão do sistema</option>
+                      <option value="Inter">Inter</option>
+                      <option value="Roboto">Roboto</option>
+                      <option value="Open Sans">Open Sans</option>
+                      <option value="Lato">Lato</option>
+                      <option value="Poppins">Poppins</option>
+                      <option value="Nunito">Nunito</option>
+                      <option value="Montserrat">Montserrat</option>
+                      <option value="Raleway">Raleway</option>
+                      <option value="Source Sans 3">Source Sans 3</option>
+                      <option value="PT Sans">PT Sans</option>
+                    </select>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label className="admin-field-label">Fonte dos Títulos</label>
+                    <select
+                      className="admin-input"
+                      value={(radioInfo.tema?.fonteTitulos) || ''}
+                      onChange={(e) => setRadioInfo({ ...radioInfo, tema: { ...radioInfo.tema, fonteTitulos: e.target.value } })}
+                      style={{ marginBottom: 0 }}
+                    >
+                      <option value="">Mesma da principal</option>
+                      <option value="Inter">Inter</option>
+                      <option value="Roboto">Roboto</option>
+                      <option value="Poppins">Poppins</option>
+                      <option value="Montserrat">Montserrat</option>
+                      <option value="Raleway">Raleway</option>
+                      <option value="Playfair Display">Playfair Display</option>
+                      <option value="Merriweather">Merriweather</option>
+                      <option value="Oswald">Oswald</option>
+                      <option value="Bebas Neue">Bebas Neue</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Preview compacto */}
+              <div className="admin-card">
+                <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: 10 }}>👁️ Preview</h4>
+                <div style={{
+                  background: radioInfo.tema?.corFundo || '#F0F4F8',
+                  padding: 14,
+                  borderRadius: radioInfo.tema?.borderRadius || '15px',
+                  border: '1px solid #ddd',
+                  display: 'flex',
+                  gap: 12,
+                  alignItems: 'stretch',
+                }}>
+                  <div style={{
+                    background: radioInfo.tema?.corPrimaria || '#1565C0',
+                    color: '#fff',
+                    padding: '10px 14px',
+                    borderRadius: radioInfo.tema?.borderRadius || '15px',
+                    fontFamily: radioInfo.tema?.fonteTitulos || radioInfo.tema?.fontePrincipal || 'inherit',
+                    fontWeight: 800,
+                    fontSize: '0.9rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    {radioInfo.nome || 'Rádio'}
+                  </div>
+                  <div style={{
+                    background: radioInfo.tema?.corCards || '#fff',
+                    padding: '10px 14px',
+                    borderRadius: radioInfo.tema?.borderRadius || '15px',
+                    color: radioInfo.tema?.corTexto || '#1a1a1a',
+                    fontFamily: radioInfo.tema?.fontePrincipal || 'inherit',
+                    fontSize: '0.82rem',
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                  }}>
+                    <span>Texto de exemplo</span>
+                    <span style={{
+                      background: radioInfo.tema?.corSecundaria || '#0D47A1',
+                      color: '#fff',
+                      borderRadius: '12px',
+                      padding: '4px 10px',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                    }}>Botão</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ===== NOTÍCIAS ===== */}
+          {aba === 'noticias' && (
+            <div>
+              <div className="admin-secao-header">
+                <h3>Notícias</h3>
+                <button className="admin-btn-add" onClick={addNoticia}>+ Adicionar</button>
+              </div>
+              {noticias.map((n, idx) => (
+                <div key={idx} className="admin-card">
+                  <div className="admin-card-header">
+                    <span className="admin-card-num">#{idx + 1}</span>
+                    <label className="admin-destaque-label">
+                      <input
+                        type="checkbox"
+                        checked={!!n.destaque}
+                        onChange={(e) => updateNoticia(idx, 'destaque', e.target.checked)}
+                      />
+                      Destaque
+                    </label>
+                    <button className="admin-btn-remove" onClick={() => removeNoticia(idx)}>✕</button>
+                  </div>
+                  <label className="admin-field-label">Título</label>
+                  <input
+                    className="admin-input"
+                    value={n.titulo}
+                    onChange={(e) => updateNoticia(idx, 'titulo', e.target.value)}
+                    placeholder="Título da notícia"
+                  />
+                  <label className="admin-field-label">Resumo</label>
+                  <textarea
+                    className="admin-input admin-textarea"
+                    value={n.resumo}
+                    onChange={(e) => updateNoticia(idx, 'resumo', e.target.value)}
+                    placeholder="Resumo da notícia"
+                    rows={2}
+                  />
+                  <label className="admin-field-label">Imagem</label>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 10 }}>
+                    <input
+                      className="admin-input"
+                      value={n.img_url || n.img || ''}
+                      onChange={(e) => updateNoticia(idx, 'img_url', e.target.value)}
+                      placeholder="URL da imagem ou faça upload →"
+                      style={{ flex: 1, marginBottom: 0 }}
+                    />
+                    <label className="admin-btn-upload">
+                      📁
+                      <input
+                        type="file"
+                        accept="image/*"
+                        hidden
+                        onChange={async (e) => {
+                          const file = e.target.files[0];
+                          if (!file) return;
+                          const url = await uploadImage(file, 'noticias');
+                          if (url) updateNoticia(idx, 'img_url', url);
+                        }}
+                      />
+                    </label>
+                  </div>
+                  {(n.img_url || n.img) && (
+                    <img src={n.img_url || n.img} alt="preview" className="admin-img-preview" />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* ===== PROGRAMAÇÃO ===== */}
+          {aba === 'programacao' && (
+            <div>
+              <div className="admin-secao-header">
+                <h3>Programação</h3>
+                <button className="admin-btn-add" onClick={() => addProg(diaSel)}>+ Adicionar</button>
+              </div>
+              <div className="admin-dias-tabs">
+                {DIAS_LABEL.map((d, i) => (
+                  <button
+                    key={i}
+                    className={`admin-dia-tab${i === diaSel ? ' ativo' : ''}`}
+                    onClick={() => setDiaSel(i)}
+                  >
+                    {d}
+                  </button>
+                ))}
+              </div>
+              {(programacao[diaSel] || []).map((item, idx) => (
+                <div key={idx} className="admin-card admin-card-prog">
+                  <div className="admin-card-header">
+                    <span className="admin-card-num">#{idx + 1}</span>
+                    <button className="admin-btn-remove" onClick={() => removeProg(diaSel, idx)}>✕</button>
+                  </div>
+                  <div className="admin-prog-row">
+                    <div style={{ flex: 1 }}>
+                      <label className="admin-field-label">Horário</label>
+                      <input
+                        className="admin-input"
+                        value={item.time}
+                        onChange={(e) => updateProg(diaSel, idx, 'time', e.target.value)}
+                        placeholder="00:00 – 00:00"
+                      />
+                    </div>
+                    <div style={{ flex: 2 }}>
+                      <label className="admin-field-label">Programa</label>
+                      <input
+                        className="admin-input"
+                        value={item.show}
+                        onChange={(e) => updateProg(diaSel, idx, 'show', e.target.value)}
+                        placeholder="Nome do programa"
+                      />
+                    </div>
+                    <div style={{ flex: 2 }}>
+                      <label className="admin-field-label">Locutor</label>
+                      <input
+                        className="admin-input"
+                        value={item.locutor}
+                        onChange={(e) => updateProg(diaSel, idx, 'locutor', e.target.value)}
+                        placeholder="Deixe vazio para Auto DJ"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* ===== LOCUTORES ===== */}
+          {aba === 'locutores' && (
+            <div>
+              <div className="admin-secao-header">
+                <h3>Locutores</h3>
+                <button className="admin-btn-add" onClick={addLocutor}>+ Adicionar</button>
+              </div>
+              {locutores.map((l, idx) => (
+                <div key={idx} className="admin-card">
+                  <div className="admin-card-header">
+                    <span className="admin-card-num">#{idx + 1}</span>
+                    <button className="admin-btn-remove" onClick={() => removeLocutor(idx)}>✕</button>
+                  </div>
+                  <div className="admin-prog-row">
+                    <div style={{ flex: 2 }}>
+                      <label className="admin-field-label">Nome</label>
+                      <input
+                        className="admin-input"
+                        value={l.nome}
+                        onChange={(e) => updateLocutor(idx, 'nome', e.target.value)}
+                        placeholder="Nome do locutor"
+                      />
+                    </div>
+                    <div style={{ flex: 2 }}>
+                      <label className="admin-field-label">Função</label>
+                      <input
+                        className="admin-input"
+                        value={l.funcao}
+                        onChange={(e) => updateLocutor(idx, 'funcao', e.target.value)}
+                        placeholder="Ex: Locutor / Apresentador"
+                      />
+                    </div>
+                  </div>
+                  <label className="admin-field-label">Descrição</label>
+                  <textarea
+                    className="admin-input admin-textarea"
+                    value={l.descricao}
+                    onChange={(e) => updateLocutor(idx, 'descricao', e.target.value)}
+                    placeholder="Breve descrição do locutor"
+                    rows={2}
+                  />
+                  <label className="admin-field-label">Programas (separados por vírgula)</label>
+                  <input
+                    className="admin-input"
+                    value={(l.programas || []).join(', ')}
+                    onChange={(e) => updateLocutor(idx, 'programas', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
+                    placeholder="Programa 1, Programa 2"
+                  />
+                  <label className="admin-field-label">Foto</label>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 10 }}>
+                    <input
+                      className="admin-input"
+                      value={l.foto_url || ''}
+                      onChange={(e) => updateLocutor(idx, 'foto_url', e.target.value)}
+                      placeholder="URL ou faça upload →"
+                      style={{ flex: 1, marginBottom: 0 }}
+                    />
+                    <label className="admin-btn-upload">
+                      📁
+                      <input
+                        type="file"
+                        accept="image/*"
+                        hidden
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) handleLocutorFoto(idx, file);
+                        }}
+                      />
+                    </label>
+                  </div>
+                  {l.foto_url && (
+                    <img src={l.foto_url} alt="preview" className="admin-img-preview" style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover' }} />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* ===== PATROCINADORES ===== */}
+          {aba === 'patrocinadores' && (
+            <div>
+              <div className="admin-secao-header">
+                <h3>Apoio Cultural / Patrocinadores</h3>
+                <button className="admin-btn-add" onClick={addPat}>+ Adicionar</button>
+              </div>
+              {patrocinadores.map((p, idx) => (
+                <div key={idx} className="admin-card">
+                  <div className="admin-card-header">
+                    <span className="admin-card-num" style={{ background: p.cor }}>#{idx + 1}</span>
+                    <button className="admin-btn-remove" onClick={() => removePat(idx)}>✕</button>
+                  </div>
+                  <div className="admin-prog-row">
+                    <div style={{ flex: '0 0 60px' }}>
+                      <label className="admin-field-label">Emoji</label>
+                      <input className="admin-input" value={p.emoji} onChange={(e) => updatePat(idx, 'emoji', e.target.value)} placeholder="🏪" />
+                    </div>
+                    <div style={{ flex: 2 }}>
+                      <label className="admin-field-label">Nome</label>
+                      <input className="admin-input" value={p.nome} onChange={(e) => updatePat(idx, 'nome', e.target.value)} placeholder="Nome do patrocinador" />
+                    </div>
+                    <div style={{ flex: 2 }}>
+                      <label className="admin-field-label">Slogan</label>
+                      <input className="admin-input" value={p.slogan} onChange={(e) => updatePat(idx, 'slogan', e.target.value)} placeholder="Slogan" />
+                    </div>
+                  </div>
+                  <div className="admin-prog-row">
+                    <div style={{ flex: 1 }}>
+                      <label className="admin-field-label">Cor</label>
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        <input type="color" value={p.cor} onChange={(e) => updatePat(idx, 'cor', e.target.value)} style={{ width: 40, height: 36, border: 'none', borderRadius: 6, cursor: 'pointer' }} />
+                        <input className="admin-input" value={p.cor} onChange={(e) => updatePat(idx, 'cor', e.target.value)} style={{ flex: 1 }} />
+                      </div>
+                    </div>
+                    <div style={{ flex: 3 }}>
+                      <label className="admin-field-label">Link (site ou WhatsApp)</label>
+                      <input className="admin-input" value={p.href} onChange={(e) => updatePat(idx, 'href', e.target.value)} placeholder="https://..." />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+        </div>
+
+        {/* Footer */}
+        <div className="admin-footer">
+          💡 Alterações são salvas no servidor e ficam disponíveis pra todos os visitantes.
+        </div>
+      </div>
+    </div>
+  );
+}

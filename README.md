@@ -1,70 +1,164 @@
-# Getting Started with Create React App
+# 📻 Radio SaaS — Plataforma de Sites para Rádios
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+> Sites modernos e bonitos para rádios, sem precisar de desenvolvedor.
 
-## Available Scripts
+Projeto inspirado na **Rádio Marajá AM 660** (Rosário do Sul/RS), com o objetivo de se tornar uma plataforma SaaS universal onde qualquer rádio pode ter seu site profissional configurável.
 
-In the project directory, you can run:
+## 🎯 Visão do Produto
 
-### `npm start`
+A maioria dos sites de rádio são feios e desatualizados. Este projeto resolve isso oferecendo um template moderno, responsivo e fácil de configurar — cada rádio personaliza cores, programação, locutores, notícias e patrocinadores sem tocar em código.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+**Modelo:** Multi-tenant — cada rádio tem seu site customizado a partir de um template base.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 🚀 Stack
 
-### `npm test`
+- **Frontend:** React 19 + Vite
+- **Backend:** Supabase (Postgres + Auth + Storage) + Vercel Serverless Functions
+- **Hospedagem:** Vercel (com suporte a wildcard subdomains)
+- **Pagamentos:** Estrutura pronta (Stripe/Mercado Pago — integração futura)
+- **Estado atual:** MVP completo — multi-tenant, auth, temas, planos, landing page
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 📁 Estrutura do Projeto
 
-### `npm run build`
+```
+api/
+├── radio/
+│   └── [slug].js            # ⭐ Serverless function — retorna config por rádio
+└── radios/
+    └── maraja.json          # Dados da Rádio Marajá (piloto)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+src/
+├── App.jsx                  # Layout principal (header, nav, grid, player)
+├── App.css                  # Estilos globais
+├── data/
+│   └── config.js            # Config local (fallback quando API não responde)
+├── components/
+│   ├── Admin.jsx            # Painel admin (edita dados via localStorage)
+│   ├── Sidebar.jsx          # Sidebar com player e patrocinadores
+│   ├── StickyPlayer.jsx     # Player fixo no rodapé
+│   ├── TabHome.jsx          # Aba Início (notícias + banners)
+│   ├── TabProgramacao.jsx   # Aba Programação (grade semanal)
+│   ├── TabLocutores.jsx     # Aba Locutores (equipe)
+│   ├── TabHistoria.jsx      # Aba Nossa História
+│   ├── TabComercial.jsx     # Aba Comercial (anúncios)
+│   └── TabContatos.jsx      # Aba Contatos (WhatsApp, redes)
+└── hooks/
+    ├── useNowPlaying.js     # Hook de metadados "tocando agora"
+    ├── useRadioConfig.js    # ⭐ Multi-tenant: detecta rádio e carrega config
+    └── useTheme.js          # ⭐ Aplica tema dinâmico (cores da rádio)
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## ✨ Features Atuais
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- 🎵 **Player de streaming** com múltiplas fontes e fallback
+- 📋 **Grade de programação** completa (7 dias da semana)
+- 🎙️ **Página de locutores** com foto, descrição e programas
+- 📰 **Notícias** com destaque e imagens
+- 💼 **Banners premium** e patrocinadores na sidebar
+- 🌙 **Dark mode** com persistência
+- 📱 **PWA-ready** (manifest, icons, mobile-capable)
+- ⚙️ **Painel admin** com login real (email/senha via Supabase Auth)
+- 💾 **Dados no banco** — tudo salva no Supabase Postgres
+- 📤 **Upload de imagens** — fotos de locutores, notícias (Supabase Storage)
+- 🔒 **RLS** — cada rádio só edita seus próprios dados
+- 📲 **Integração WhatsApp** (pedir música)
+- 🔍 **SEO + Open Graph** configurados
+- 🏢 **Multi-tenant** — cada rádio tem seu site via subdomínio ou query param
+- 🎨 **Temas dinâmicos** — cores e fontes configuráveis por rádio via API
+- 🔌 **API serverless** — `/api/radio/:slug` serve config de cada rádio
+- 💳 **Sistema de planos** — free/basic/premium com controle de features
+- 🏷️ **Marca d'água** — removível nos planos pagos
+- 🌐 **Landing page** — página de venda da plataforma com tabela de preços
 
-### `npm run eject`
+## 🗺️ Roadmap — Evolução para SaaS
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Fase 1 — Multi-tenant ✅
+- [x] Backend leve (API serverless na Vercel)
+- [x] Config dinâmico por rádio (fetch via subdomínio ou query param `?radio=slug`)
+- [x] JSON por rádio em `api/radios/` (futuro: migra pra banco)
+- [x] Tema dinâmico (cores aplicadas via CSS variables)
+- [x] Fallback pro config local se API falhar
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Fase 2 — Admin real ✅
+- [x] Autenticação real (Supabase Auth — email/senha)
+- [x] Painel admin salva no Supabase (Postgres)
+- [x] Upload de imagens (Supabase Storage — bucket `media`)
+- [x] RLS (Row Level Security) — cada dono edita só sua rádio
+- [x] Aba de locutores no admin com foto e programas
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Fase 3 — Personalização visual ✅
+- [x] Cores configuráveis no admin (primária, secundária, fundo, cards, texto)
+- [x] Fontes do Google Fonts (seleção no admin com preview)
+- [x] Fonte separada pra títulos
+- [x] Border radius configurável
+- [x] Preview ao vivo no painel admin
+- [x] Carregamento dinâmico de fontes do Google Fonts
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Fase 4 — Monetização ✅
+- [x] Sistema de planos (free / basic / premium) com controle de features
+- [x] Marca d'água "Feito com RadioSaaS" no plano grátis
+- [x] Bloqueio visual de features no admin (cores, fontes) com badge de upgrade
+- [x] Landing page com tabela de preços e demo
+- [x] Estrutura preparada pra integração com gateway de pagamento
+- [ ] Integração com Stripe/Mercado Pago (futuro)
 
-## Learn More
+### Fase 5 — Domínio customizado
+- [x] Detecção automática por subdomínio
+- [x] Vercel configurado pra wildcard domains
+- [ ] Painel pra rádio configurar domínio próprio (futuro — requer DNS + Vercel API)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 🌐 Domínio Customizado
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Cada rádio pode usar seu próprio domínio. O fluxo:
 
-### Code Splitting
+1. No painel Vercel, vá em Settings > Domains
+2. Adicione um wildcard: `*.radiosite.com.br`
+3. Cada rádio acessa via `maraja.radiosite.com.br`
+4. Pra domínio 100% customizado (ex: `www.radiomaraja.com`):
+   - A rádio aponta o DNS (CNAME) pro domínio da plataforma
+   - No Vercel, adiciona o domínio customizado
+   - O app detecta automaticamente pela tabela de domínios
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## 🛠️ Rodando localmente
 
-### Analyzing the Bundle Size
+```bash
+# Instalar dependências
+npm install
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+# Rodar em dev
+npm start
+```
 
-### Making a Progressive Web App
+O dev server simula as API routes localmente via plugin Vite — funciona igual à Vercel.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+**Testar outra rádio:** Acesse `http://localhost:3000?radio=maraja` (ou crie outro JSON em `api/radios/`).
 
-### Advanced Configuration
+```bash
+# Build de produção
+npm run build
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## 📝 Configuração
 
-### Deployment
+### Adicionando uma nova rádio
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+1. Crie um arquivo JSON em `api/radios/<slug>.json`
+2. Siga a estrutura de `api/radios/maraja.json` como modelo
+3. Acesse via `?radio=<slug>` ou configure o subdomínio `<slug>.seudominio.com`
 
-### `npm run build` fails to minify
+### Campos do JSON de uma rádio
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- `slug` — Identificador único (usado na URL)
+- `nome` / `frequencia` / `logo` — Identidade visual
+- `whatsapp` — Número pra integração WhatsApp
+- `tema` — Cores (primária, secundária, fundo, cards, texto)
+- `streams` — URLs de streaming (principal + fallbacks)
+- `programacao` — Grade semanal (0=Dom a 6=Sáb)
+- `locutores` — Equipe com foto e descrição
+- `noticias` — Notícias com imagem e destaque
+- `bannersPremium` — Anúncios premium
+- `patrocinadores` — Apoio cultural na sidebar
+
+## 📄 Licença
+
+Projeto pessoal em desenvolvimento. Todos os direitos reservados.
