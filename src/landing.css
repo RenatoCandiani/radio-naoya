@@ -296,3 +296,216 @@
   .landing-subtitle { font-size: 1.1rem; }
   .landing-features-grid { grid-template-columns: 1fr; }
 }
+
+
+/* ============================================================
+   DEMO INTERATIVA
+   ============================================================ */
+.landing-demo {
+  max-width: 1100px;
+  margin: -60px auto 0;
+  padding: 0 24px 40px;
+  position: relative;
+  z-index: 10;
+}
+
+.landing-demo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #1a1a2e;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 12px 12px 0 0;
+}
+
+.landing-demo-header h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.landing-demo-close {
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.landing-demo-close:hover { background: rgba(255,255,255,0.25); }
+
+.landing-demo-iframe {
+  width: 100%;
+  height: 600px;
+  border: none;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+}
+
+/* ============================================================
+   COMO FUNCIONA (Steps)
+   ============================================================ */
+.landing-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  margin-top: 40px;
+  text-align: center;
+}
+
+.landing-step {
+  padding: 24px;
+}
+
+.landing-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: #1565C0;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 1.3rem;
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
+.landing-step h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 8px;
+}
+
+.landing-step p {
+  font-size: 0.9rem;
+  color: #666;
+  line-height: 1.5;
+}
+
+/* ============================================================
+   FORMULÁRIO DE CADASTRO
+   ============================================================ */
+.landing-cadastro {
+  background: #fff;
+  max-width: 100%;
+  padding: 80px 24px;
+}
+
+.landing-form {
+  max-width: 600px;
+  margin: 32px auto 0;
+  text-align: left;
+}
+
+.landing-form-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.landing-form-field {
+  flex: 1;
+}
+
+.landing-form-field label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.landing-form-field input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+.landing-form-field input:focus {
+  outline: none;
+  border-color: #1565C0;
+}
+
+.landing-form-slug {
+  position: relative;
+}
+.landing-form-slug input {
+  padding-right: 120px;
+}
+.landing-form-slug-hint {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.82rem;
+  color: #999;
+  font-weight: 600;
+}
+
+.landing-form-btn {
+  width: 100%;
+  padding: 14px;
+  background: #1565C0;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.landing-form-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+.landing-form-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.landing-form-error {
+  color: #e53935;
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.landing-form-success {
+  max-width: 500px;
+  margin: 32px auto 0;
+  text-align: center;
+  background: #e8f5e9;
+  border-radius: 16px;
+  padding: 40px;
+}
+.landing-form-success h3 {
+  color: #2e7d32;
+  font-size: 1.3rem;
+  margin: 12px 0 8px;
+}
+.landing-form-success p {
+  color: #555;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+/* ============================================================
+   RESPONSIVO — extras
+   ============================================================ */
+@media (max-width: 600px) {
+  .landing-form-row { flex-direction: column; gap: 12px; }
+  .landing-steps { grid-template-columns: 1fr; gap: 20px; }
+  .landing-demo-iframe { height: 400px; }
+}

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, lazy, Suspense } from 'react';
 import './App.css';
 import './landing.css';
 
@@ -9,6 +9,7 @@ import {
 import { useNowPlaying } from './hooks/useNowPlaying';
 import { useRadioConfig } from './hooks/useRadioConfig';
 import { useTheme } from './hooks/useTheme';
+import { useAnalytics } from './hooks/useAnalytics';
 import { temFeature } from './lib/planos';
 import { useAdminData, Admin } from './components/Admin';
 import { Sidebar } from './components/Sidebar';
@@ -63,6 +64,9 @@ function App() {
 
   // Aplica tema dinâmico da rádio
   useTheme(radioData.tema);
+
+  // Analytics
+  useAnalytics(slug);
 
   const streams = radioData.streams && radioData.streams.length > 0 ? radioData.streams : STREAMS;
 

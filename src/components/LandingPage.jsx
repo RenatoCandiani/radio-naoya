@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { supabase } from '../lib/supabase';
 import { PLANOS } from '../lib/planos';
 
 const FEATURES_LISTA = [
@@ -13,6 +15,56 @@ const FEATURES_LISTA = [
 ];
 
 export function LandingPage() {
+  const [formData, setFormData] = useState({ nomeRadio: '', slug: '', email: '', senha: '' });
+  const [formStatus, setFormStatus] = useState(''); // '', 'loading', 'success', 'error'
+  const [formMsg, setFormMsg] = useState('');
+  const [showDemo, setShowDemo] = useState(false);
+
+  const handleCadastro = async (e) => {
+    e.preventDefault();
+    setFormStatus('loading');
+    setFormMsg('');
+
+    const { nomeRadio, slug, email, senha } = formData;
+
+    // Valida slug
+    const safeSlug = slug.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    if (!safeSlug || safeSlug.length < 3) {
+      setFormStatus('error');
+      setFormMsg('O slug precisa ter pelo menos 3 caracteres (só letras, números e hífens).');
+      return;
+    }
+
+    try {
+      // 1. Cria usuário
+      const { data: authData, error: authErr } = await supabase.auth.signUp({ email, password: senha });
+      if (authErr) throw new Error(authErr.message);
+
+      // 2. Cria a rádio
+      const { error: radioErr } = await supabase.from('radios').insert({
+        slug: safeSlug,
+        nome: nomeRadio,
+        owner_id: authData.user?.id,
+        plano: 'free',
+        tema: { corPrimaria: '#1565C0', corSecundaria: '#0D47A1', corFundo: '#F0F4F8', corCards: '#ffffff', corTexto: '#333333' },
+        streams: [],
+      });
+
+      if (radioErr) {
+        if (radioErr.message.includes('duplicate') || radioErr.message.includes('unique')) {
+          throw new Error('Esse slug já está em uso. Tente outro.');
+        }
+        throw new Error(radioErr.message);
+      }
+
+      setFormStatus('success');
+      setFormMsg(`Rádio "${nomeRadio}" criada! Verifique seu email para confirmar a conta. Depois acesse com ?radio=${safeSlug}`);
+    } catch (err) {
+      setFormStatus('error');
+      setFormMsg(err.message);
+    }
+  };
+
   return (
     <div className="landing">
       {/* Hero */}
@@ -27,11 +79,28 @@ export function LandingPage() {
             Sua rádio merece um site profissional. Configure cores, programação, locutores e notícias em minutos. Pronto pra transmitir.
           </p>
           <div className="landing-ctas">
-            <a href="#planos" className="landing-btn-primario">Ver planos</a>
-            <a href="?radio=maraja" className="landing-btn-secundario">Ver demo ao vivo →</a>
+            <a href="#cadastro" className="landing-btn-primario">Criar meu site grátis</a>
+            <button onClick={() => setShowDemo(true)} className="landing-btn-secundario">
+              Ver demo ao vivo →
+            </button>
           </div>
         </div>
       </header>
+
+      {/* Demo interativa */}
+      {showDemo && (
+        <section className="landing-demo">
+          <div className="landing-demo-header">
+            <h2>🎵 Demo — Rádio Marajá AM 660</h2>
+            <button onClick={() => setShowDemo(false)} className="landing-demo-close">✕ Fechar</button>
+          </div>
+          <iframe
+            src="/?radio=maraja"
+            title="Demo RadioSaaS - Rádio Marajá"
+            className="landing-demo-iframe"
+          />
+        </section>
+      )}
 
       {/* Features */}
       <section className="landing-section">
@@ -70,6 +139,28 @@ export function LandingPage() {
         </div>
       </section>
 
+      {/* Como funciona */}
+      <section className="landing-section">
+        <h2>Como funciona</h2>
+        <div className="landing-steps">
+          <div className="landing-step">
+            <span className="landing-step-num">1</span>
+            <h3>Cadastre sua rádio</h3>
+            <p>Preencha o nome, escolha um slug e crie sua conta em segundos.</p>
+          </div>
+          <div className="landing-step">
+            <span className="landing-step-num">2</span>
+            <h3>Configure o conteúdo</h3>
+            <p>Adicione programação, locutores, notícias e patrocinadores pelo painel admin.</p>
+          </div>
+          <div className="landing-step">
+            <span className="landing-step-num">3</span>
+            <h3>Pronto! Está no ar</h3>
+            <p>Seu site já está disponível. Compartilhe com seus ouvintes.</p>
+          </div>
+        </div>
+      </section>
+
       {/* Planos */}
       <section className="landing-section landing-planos" id="planos">
         <h2>Planos</h2>
@@ -97,12 +188,82 @@ export function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <button className="landing-plano-btn">
+              <a href="#cadastro" className="landing-plano-btn">
                 {key === 'free' ? 'Começar grátis' : 'Escolher plano'}
-              </button>
+              </a>
             </div>
           ))}
         </div>
+      </section>
+
+      {/* Formulário de cadastro */}
+      <section className="landing-section landing-cadastro" id="cadastro">
+        <h2>Crie o site da sua rádio agora</h2>
+        <p className="landing-planos-sub">Leva menos de 1 minuto. Sem cartão de crédito.</p>
+
+        {formStatus === 'success' ? (
+          <div className="landing-form-success">
+            <span style={{ fontSize: '2.5rem' }}>🎉</span>
+            <h3>Rádio criada com sucesso!</h3>
+            <p>{formMsg}</p>
+          </div>
+        ) : (
+          <form className="landing-form" onSubmit={handleCadastro}>
+            <div className="landing-form-row">
+              <div className="landing-form-field">
+                <label>Nome da Rádio</label>
+                <input
+                  type="text"
+                  placeholder="Ex: Rádio Exemplo FM"
+                  value={formData.nomeRadio}
+                  onChange={(e) => setFormData({ ...formData, nomeRadio: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="landing-form-field">
+                <label>Slug (URL)</label>
+                <div className="landing-form-slug">
+                  <input
+                    type="text"
+                    placeholder="minha-radio"
+                    value={formData.slug}
+                    onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })}
+                    required
+                    minLength={3}
+                  />
+                  <span className="landing-form-slug-hint">.radiosaas.com</span>
+                </div>
+              </div>
+            </div>
+            <div className="landing-form-row">
+              <div className="landing-form-field">
+                <label>Email</label>
+                <input
+                  type="email"
+                  placeholder="contato@suaradio.com"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="landing-form-field">
+                <label>Senha</label>
+                <input
+                  type="password"
+                  placeholder="Mínimo 6 caracteres"
+                  value={formData.senha}
+                  onChange={(e) => setFormData({ ...formData, senha: e.target.value })}
+                  required
+                  minLength={6}
+                />
+              </div>
+            </div>
+            {formStatus === 'error' && <p className="landing-form-error">{formMsg}</p>}
+            <button type="submit" className="landing-form-btn" disabled={formStatus === 'loading'}>
+              {formStatus === 'loading' ? 'Criando...' : '🚀 Criar meu site grátis'}
+            </button>
+          </form>
+        )}
       </section>
 
       {/* Footer */}

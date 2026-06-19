@@ -5,7 +5,8 @@ import { supabase } from '../lib/supabase';
  * Detecta qual rádio carregar baseado em:
  * 1. Query param: ?radio=maraja
  * 2. Subdomínio: maraja.tuaplataforma.com
- * 3. Fallback: 'maraja' (rádio piloto)
+ * 3. Domínio customizado: www.radiomaraja.com (resolve via tabela dominios)
+ * 4. Fallback: 'maraja' (rádio piloto)
  */
 function detectSlug() {
   // 1. Query param (útil pra dev e testes)
@@ -28,7 +29,13 @@ function detectSlug() {
     return parts[0];
   }
 
-  // 3. Fallback
+  // 3. Domínio customizado — retorna null, será resolvido via query
+  // Se não é localhost e não é subdomínio reconhecido, pode ser domínio customizado
+  if (hostname !== 'localhost' && !hostname.includes('vercel.app') && !hostname.includes('radiosaas')) {
+    return `__domain__:${hostname}`;
+  }
+
+  // 4. Fallback
   return 'maraja';
 }
 
@@ -51,15 +58,40 @@ export function useRadioConfig() {
       setError(null);
 
       try {
-        // Tenta buscar do Supabase primeiro
-        const { data: radio, error: radioErr } = await supabase
-          .from('radios')
-          .select('*')
-          .eq('slug', slug)
-          .single();
+        let radio;
 
-        if (radioErr || !radio) {
-          throw new Error(`Rádio "${slug}" não encontrada no banco`);
+        // Resolve domínio customizado
+        if (slug.startsWith('__domain__:')) {
+          const domain = slug.replace('__domain__:', '');
+          const { data: dominio } = await supabase
+            .from('dominios')
+            .select('radio_id')
+            .eq('dominio', domain)
+            .single();
+
+          if (dominio) {
+            const { data: r } = await supabase
+              .from('radios')
+              .select('*')
+              .eq('id', dominio.radio_id)
+              .single();
+            radio = r;
+          }
+        }
+
+        // Busca por slug normal
+        if (!radio) {
+          const actualSlug = slug.startsWith('__domain__:') ? 'maraja' : slug;
+          const { data: r, error: radioErr } = await supabase
+            .from('radios')
+            .select('*')
+            .eq('slug', actualSlug)
+            .single();
+
+          if (radioErr || !r) {
+            throw new Error(`Rádio "${actualSlug}" não encontrada no banco`);
+          }
+          radio = r;
         }
 
         // Busca dados relacionados

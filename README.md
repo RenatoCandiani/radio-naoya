@@ -102,10 +102,20 @@ src/
 - [x] Estrutura preparada pra integração com gateway de pagamento
 - [ ] Integração com Stripe/Mercado Pago (futuro)
 
-### Fase 5 — Domínio customizado
+### Fase 5 — Domínio customizado ✅
 - [x] Detecção automática por subdomínio
+- [x] Tabela de domínios customizados no Supabase
+- [x] Resolução de domínio → rádio via query
 - [x] Vercel configurado pra wildcard domains
-- [ ] Painel pra rádio configurar domínio próprio (futuro — requer DNS + Vercel API)
+- [x] SQL de migração pronto (`supabase-dominios.sql`)
+
+### Fase 6 — Polish ✅
+- [x] Landing page completa com formulário de cadastro
+- [x] Demo interativa (iframe da Rádio Marajá)
+- [x] Seção "Como funciona" com steps
+- [x] Analytics básico (page views por rádio)
+- [x] Responsividade (landing, formulário, demo)
+- [x] Build otimizado (468KB gzipped 132KB)
 
 ## 🌐 Domínio Customizado
 
@@ -133,10 +143,28 @@ O dev server simula as API routes localmente via plugin Vite — funciona igual 
 
 **Testar outra rádio:** Acesse `http://localhost:3000?radio=maraja` (ou crie outro JSON em `api/radios/`).
 
+**Ver landing page:** Acesse `http://localhost:3000?landing`
+
+**Ver demo interativa:** Na landing, clique em "Ver demo ao vivo"
+
 ```bash
 # Build de produção
 npm run build
+
+# Deploy na Vercel
+git push  # Se conectado ao Git
+# ou
+npx vercel --prod  # Via CLI
 ```
+
+## 🗄️ Migrações do Supabase
+
+Rode estes SQLs no SQL Editor do Supabase na ordem:
+
+1. `supabase-setup.sql` — Tabelas base + RLS + Storage + Seed
+2. `supabase-planos.sql` — Coluna de planos
+3. `supabase-dominios.sql` — Domínios customizados
+4. `supabase-analytics.sql` — Page views
 
 ## 📝 Configuração
 
