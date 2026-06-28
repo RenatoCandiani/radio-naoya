@@ -70,7 +70,7 @@ export function LandingPage() {
       {/* Hero */}
       <header className="landing-hero">
         <div className="landing-hero-content">
-          <h1>📻 RadioSaaS</h1>
+          <h1>📻 Rádio Naoya</h1>
           <p className="landing-subtitle">
             Sites modernos e bonitos para rádios.<br />
             Sem precisar de desenvolvedor.
@@ -96,7 +96,7 @@ export function LandingPage() {
           </div>
           <iframe
             src="/?radio=maraja"
-            title="Demo RadioSaaS - Rádio Marajá"
+            title="Demo Rádio Naoya - Rádio Marajá"
             className="landing-demo-iframe"
           />
         </section>
@@ -231,7 +231,7 @@ export function LandingPage() {
                     required
                     minLength={3}
                   />
-                  <span className="landing-form-slug-hint">.radiosaas.com</span>
+                  <span className="landing-form-slug-hint">.radionaoya.com</span>
                 </div>
               </div>
             </div>
@@ -266,9 +266,36 @@ export function LandingPage() {
         )}
       </section>
 
+      {/* FAQ */}
+      <section className="landing-section">
+        <h2>Perguntas Frequentes</h2>
+        <div className="landing-faq">
+          <details className="landing-faq-item">
+            <summary>Preciso saber programar?</summary>
+            <p>Não! Tudo é configurado pelo painel admin. Você edita cores, programação, locutores e notícias sem tocar em código.</p>
+          </details>
+          <details className="landing-faq-item">
+            <summary>Posso usar meu próprio domínio?</summary>
+            <p>Sim! Nos planos Básico e Premium você pode configurar um domínio customizado (ex: www.suaradio.com).</p>
+          </details>
+          <details className="landing-faq-item">
+            <summary>O player funciona com qualquer streaming?</summary>
+            <p>Sim, basta informar a URL do seu stream (Icecast, Shoutcast, BRLogic, etc). Suportamos qualquer servidor de áudio.</p>
+          </details>
+          <details className="landing-faq-item">
+            <summary>Posso cancelar a qualquer momento?</summary>
+            <p>Sim! Sem fidelidade. Cancele quando quiser e seu site volta pro plano grátis.</p>
+          </details>
+          <details className="landing-faq-item">
+            <summary>Como monetizo meu site?</summary>
+            <p>No plano Premium, você pode adicionar banners de publicidade e vender espaços pra anunciantes locais direto pelo painel.</p>
+          </details>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="landing-footer">
-        <p>📻 RadioSaaS — Sites modernos para rádios</p>
+        <p>📻 Rádio Naoya — Sites modernos para rádios</p>
         <p className="landing-footer-sub">Feito com ❤️ para rádios do Brasil</p>
       </footer>
     </div>

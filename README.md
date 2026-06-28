@@ -1,4 +1,4 @@
-# 📻 Radio SaaS — Plataforma de Sites para Rádios
+# 📻 Rádio Naoya — Plataforma de Sites para Rádios
 
 > Sites modernos e bonitos para rádios, sem precisar de desenvolvedor.
 
@@ -96,7 +96,7 @@ src/
 
 ### Fase 4 — Monetização ✅
 - [x] Sistema de planos (free / basic / premium) com controle de features
-- [x] Marca d'água "Feito com RadioSaaS" no plano grátis
+- [x] Marca d'água "Feito com Rádio Naoya" no plano grátis
 - [x] Bloqueio visual de features no admin (cores, fontes) com badge de upgrade
 - [x] Landing page com tabela de preços e demo
 - [x] Estrutura preparada pra integração com gateway de pagamento

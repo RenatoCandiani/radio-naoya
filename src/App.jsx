@@ -10,6 +10,8 @@ import { useNowPlaying } from './hooks/useNowPlaying';
 import { useRadioConfig } from './hooks/useRadioConfig';
 import { useTheme } from './hooks/useTheme';
 import { useAnalytics } from './hooks/useAnalytics';
+import { useSEO } from './hooks/useSEO';
+import { usePWA } from './hooks/usePWA';
 import { temFeature } from './lib/planos';
 import { useAdminData, Admin } from './components/Admin';
 import { Sidebar } from './components/Sidebar';
@@ -64,6 +66,12 @@ function App() {
 
   // Aplica tema dinâmico da rádio
   useTheme(radioData.tema);
+
+  // SEO dinâmico
+  useSEO(radioData);
+
+  // PWA dinâmica
+  usePWA(radioData);
 
   // Analytics
   useAnalytics(slug);

@@ -19,14 +19,16 @@ export const STREAMS = [
 
 export const PROGRAMACAO = {
   0: [ // Domingo
+    { time: '00:00 – 06:00', show: '⛔ Fora do Ar — Retorna às 06:00', locutor: '' },
     { time: '06:00 – 09:00', show: 'Pelos Domingos 1° Aparte', locutor: 'Joel de Freitas Paulo' },
     { time: '09:00 – 10:00', show: 'Programação Religiosa', locutor: '' },
     { time: '10:00 – 12:00', show: 'Pelos Domingos 2° Aparte', locutor: 'Joel de Freitas Paulo' },
-    { time: '13:00 – 15:30', show: 'Querência Céu e Campo', locutor: '' },
+    { time: '13:00 – 15:00', show: 'Querência Céu e Campo', locutor: 'Cristian Sampaio Dornelles' },
     { time: '21:00 – 22:00', show: 'Gauchesco e Brasileiro', locutor: '' },
     { time: '22:00 – 23:59', show: 'Love Night', locutor: '' },
   ],
   1: [ // Segunda
+    { time: '00:00 – 05:15', show: '⛔ Fora do Ar — Retorna às 05:15', locutor: '' },
     { time: '05:15 – 07:05', show: 'Chimarreando no Galpão', locutor: 'Joel de Freitas Paulo' },
     { time: '07:15 – 08:00', show: 'Rádio Jornal da Manhã', locutor: 'José Benedito da Silva' },
     { time: '08:10 – 10:00', show: 'Revista do Rádio', locutor: 'Jacy Ferreira' },
@@ -40,6 +42,7 @@ export const PROGRAMACAO = {
     { time: '22:30 – 23:59', show: 'Love Night', locutor: '' },
   ],
   2: [ // Terça
+    { time: '00:00 – 05:30', show: '⛔ Fora do Ar — Retorna às 05:30', locutor: '' },
     { time: '05:30 – 07:00', show: 'Chimarreando no Galpão', locutor: 'Joel de Freitas Paulo' },
     { time: '07:15 – 08:00', show: 'Rádio Jornal da Manhã', locutor: 'José Benedito da Silva' },
     { time: '08:10 – 10:00', show: 'Revista do Rádio', locutor: 'Jacy Ferreira' },
@@ -52,6 +55,7 @@ export const PROGRAMACAO = {
     { time: '20:10 – 23:59', show: 'Love Night', locutor: '' },
   ],
   3: [ // Quarta
+    { time: '00:00 – 05:15', show: '⛔ Fora do Ar — Retorna às 05:15', locutor: '' },
     { time: '05:15 – 07:05', show: 'Chimarreando no Galpão', locutor: 'Joel de Freitas Paulo' },
     { time: '07:15 – 08:00', show: 'Rádio Jornal da Manhã', locutor: 'José Benedito da Silva' },
     { time: '08:10 – 10:00', show: 'Revista do Rádio', locutor: 'Jacy Ferreira' },
@@ -64,6 +68,7 @@ export const PROGRAMACAO = {
     { time: '20:10 – 21:00', show: 'Programação Musical', locutor: '' },
   ],
   4: [ // Quinta
+    { time: '00:00 – 05:15', show: '⛔ Fora do Ar — Retorna às 05:15', locutor: '' },
     { time: '05:15 – 07:05', show: 'Chimarreando no Galpão', locutor: 'Joel de Freitas Paulo' },
     { time: '07:15 – 08:00', show: 'Rádio Jornal da Manhã', locutor: 'José Benedito da Silva' },
     { time: '08:10 – 10:00', show: 'Revista do Rádio', locutor: 'Jacy Ferreira' },
@@ -76,6 +81,7 @@ export const PROGRAMACAO = {
     { time: '20:10 – 23:59', show: 'Love Night', locutor: '' },
   ],
   5: [ // Sexta
+    { time: '00:00 – 05:15', show: '⛔ Fora do Ar — Retorna às 05:15', locutor: '' },
     { time: '05:15 – 07:15', show: 'Chimarreando no Galpão', locutor: 'Joel de Freitas Paulo' },
     { time: '07:15 – 08:00', show: 'Rádio Jornal da Manhã', locutor: 'José Benedito da Silva' },
     { time: '08:10 – 10:00', show: 'Revista do Rádio', locutor: 'Jacy Ferreira' },
@@ -89,6 +95,8 @@ export const PROGRAMACAO = {
     { time: '22:30 – 23:59', show: 'Encontro com Os Serranos', locutor: '' },
   ],
   6: [ // Sábado
+    { time: '00:00 – 05:30', show: '⛔ Fora do Ar — Retorna às 05:30', locutor: '' },
+    { time: '05:30 – 07:00', show: 'Amanhecer no Rio Grande', locutor: 'Osíris Santos' },
     { time: '07:00 – 07:15', show: 'Prosa Rural', locutor: '' },
     { time: '07:15 – 08:00', show: 'Rádio Jornal da Manhã', locutor: 'José Benedito da Silva' },
     { time: '08:10 – 10:00', show: 'Revista do Rádio', locutor: 'Jacy Ferreira' },
@@ -215,6 +223,20 @@ export const LOCUTORES = [
     programas: ['Notícias na Manhã', 'Rádio Jornal do Meio Dia'],
     descricao: 'Com experiência e profundidade, Moacir mantém os ouvintes informados sobre tudo que acontece em Rosário do Sul e região.',
     foto: '/moacirGuazina.jpg',
+  },
+  {
+    nome: 'Cristian Sampaio Dornelles',
+    funcao: 'Locutor / Apresentador',
+    programas: ['Querência Céu e Campo'],
+    descricao: 'Cristian comanda o Querência Céu e Campo, levando o melhor da cultura gaúcha e do campo aos domingos na Marajá.',
+    foto: null,
+  },
+  {
+    nome: 'Orísis Santos',
+    funcao: 'Locutor / Apresentador',
+    programas: ['Amanhecer no Rio Grande'],
+    descricao: 'Orisis abre a programação dos sábados com o Amanhecer no Rio Grande, trazendo música e informação para começar o fim de semana.',
+    foto: '/osirisSantos.png',
   },
 ];
 

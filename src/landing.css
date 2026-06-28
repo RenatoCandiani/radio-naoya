@@ -1,5 +1,5 @@
 /* ============================================================
-   LANDING PAGE — RadioSaaS
+   LANDING PAGE — Rádio Naoya
    ============================================================ */
 
 .landing {
@@ -508,4 +508,49 @@
   .landing-form-row { flex-direction: column; gap: 12px; }
   .landing-steps { grid-template-columns: 1fr; gap: 20px; }
   .landing-demo-iframe { height: 400px; }
+}
+
+
+/* ============================================================
+   FAQ
+   ============================================================ */
+.landing-faq {
+  max-width: 650px;
+  margin: 32px auto 0;
+  text-align: left;
+}
+
+.landing-faq-item {
+  border-bottom: 1px solid #e0e0e0;
+  padding: 16px 0;
+}
+
+.landing-faq-item summary {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.landing-faq-item summary::after {
+  content: '+';
+  font-size: 1.3rem;
+  font-weight: 300;
+  color: #888;
+  transition: transform 0.2s;
+}
+
+.landing-faq-item[open] summary::after {
+  content: '−';
+}
+
+.landing-faq-item p {
+  margin-top: 10px;
+  font-size: 0.92rem;
+  color: #555;
+  line-height: 1.6;
 }

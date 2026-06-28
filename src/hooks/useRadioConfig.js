@@ -31,7 +31,7 @@ function detectSlug() {
 
   // 3. Domínio customizado — retorna null, será resolvido via query
   // Se não é localhost e não é subdomínio reconhecido, pode ser domínio customizado
-  if (hostname !== 'localhost' && !hostname.includes('vercel.app') && !hostname.includes('radiosaas')) {
+  if (hostname !== 'localhost' && !hostname.includes('vercel.app') && !hostname.includes('radionaoya')) {
     return `__domain__:${hostname}`;
   }
 

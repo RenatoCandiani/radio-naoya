@@ -36,7 +36,7 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
   const [loginMsg, setLoginMsg] = useState('');
 
   // Admin state
-  const [aba, setAba] = useState('aparencia');
+  const [aba, setAba] = useState('dashboard');
   const [salvo, setSalvo] = useState(false);
   const [saving, setSaving] = useState(false);
   const [radioId, setRadioId] = useState(null);
@@ -341,6 +341,20 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
           >
             {isSignUp ? 'Já tenho conta → Entrar' : 'Criar conta nova'}
           </button>
+          {!isSignUp && (
+            <button
+              className="admin-btn-link"
+              style={{ marginTop: 4, fontSize: '0.78rem', color: '#888' }}
+              onClick={async () => {
+                if (!email) { setLoginMsg('Digite seu email primeiro.'); return; }
+                const { error } = await supabase.auth.resetPasswordForEmail(email);
+                if (error) { setLoginMsg(error.message); }
+                else { setLoginMsg('Email de recuperação enviado! Verifique sua caixa de entrada.'); }
+              }}
+            >
+              Esqueci minha senha
+            </button>
+          )}
         </div>
       </div>
     );
@@ -380,6 +394,7 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
         {/* Abas */}
         <div className="admin-abas">
           {[
+            { id: 'dashboard',      label: '📊 Dashboard' },
             { id: 'aparencia',      label: '🎨 Aparência' },
             { id: 'noticias',       label: '📰 Notícias' },
             { id: 'programacao',    label: '🕐 Programação' },
@@ -398,6 +413,88 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
 
         {/* Conteúdo */}
         <div className="admin-conteudo">
+
+          {/* ===== DASHBOARD ===== */}
+          {aba === 'dashboard' && (
+            <div>
+              <div className="admin-secao-header">
+                <h3>Dashboard</h3>
+              </div>
+
+              {/* Cards de stats */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 20 }}>
+                <div className="admin-card" style={{ textAlign: 'center', padding: 20 }}>
+                  <div style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--cor-primaria)' }}>
+                    {radioInfo.views ?? 0}
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: '#888', fontWeight: 600, marginTop: 4 }}>VISUALIZAÇÕES</div>
+                </div>
+                <div className="admin-card" style={{ textAlign: 'center', padding: 20 }}>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--cor-primaria)', textTransform: 'capitalize' }}>
+                    {plano}
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: '#888', fontWeight: 600, marginTop: 4 }}>PLANO ATUAL</div>
+                </div>
+                <div className="admin-card" style={{ textAlign: 'center', padding: 20 }}>
+                  <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--cor-primaria)' }}>
+                    {radioInfo.created_at ? new Date(radioInfo.created_at).toLocaleDateString('pt-BR') : '—'}
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: '#888', fontWeight: 600, marginTop: 4 }}>CRIADO EM</div>
+                </div>
+              </div>
+
+              {/* Info da rádio */}
+              <div className="admin-card">
+                <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: 12 }}>📻 Informações da Rádio</h4>
+                <div className="admin-prog-row">
+                  <div style={{ flex: 2 }}>
+                    <label className="admin-field-label">Nome</label>
+                    <input
+                      className="admin-input"
+                      value={radioInfo.nome || ''}
+                      onChange={(e) => setRadioInfo({ ...radioInfo, nome: e.target.value })}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label className="admin-field-label">Frequência</label>
+                    <input
+                      className="admin-input"
+                      value={radioInfo.frequencia || ''}
+                      onChange={(e) => setRadioInfo({ ...radioInfo, frequencia: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="admin-prog-row">
+                  <div style={{ flex: 1 }}>
+                    <label className="admin-field-label">WhatsApp</label>
+                    <input
+                      className="admin-input"
+                      value={radioInfo.whatsapp || ''}
+                      onChange={(e) => setRadioInfo({ ...radioInfo, whatsapp: e.target.value })}
+                      placeholder="5511999999999"
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label className="admin-field-label">URL dos Metadados</label>
+                    <input
+                      className="admin-input"
+                      value={radioInfo.metadados_url || ''}
+                      onChange={(e) => setRadioInfo({ ...radioInfo, metadados_url: e.target.value })}
+                      placeholder="URL da API de streaming"
+                    />
+                  </div>
+                </div>
+                <label className="admin-field-label">História</label>
+                <textarea
+                  className="admin-input admin-textarea"
+                  value={radioInfo.historia || ''}
+                  onChange={(e) => setRadioInfo({ ...radioInfo, historia: e.target.value })}
+                  rows={4}
+                  placeholder="Conte a história da sua rádio..."
+                />
+              </div>
+            </div>
+          )}
 
           {/* ===== APARÊNCIA ===== */}
           {aba === 'aparencia' && (

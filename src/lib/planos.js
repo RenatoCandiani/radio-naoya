@@ -7,7 +7,7 @@ export const PLANOS = {
     nome: 'Grátis',
     preco: 0,
     features: {
-      marcaDagua: true,        // Mostra "Feito com RadioSaaS"
+      marcaDagua: true,        // Mostra "Feito com Rádio Naoya"
       coresCustom: false,      // Não pode mudar cores
       fontesCustom: false,     // Não pode mudar fontes
       uploadImagens: false,    // Sem upload (usa URLs externas)

@@ -7,7 +7,7 @@ export function MarcaDagua({ show }) {
 
   return (
     <div className="marca-dagua">
-      <span>📻 Feito com <strong>RadioSaaS</strong></span>
+      <span>📻 Feito com <strong>Rádio Naoya</strong></span>
     </div>
   );
 }
