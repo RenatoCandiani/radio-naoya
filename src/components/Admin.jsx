@@ -443,6 +443,54 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
                 </div>
               </div>
 
+              {/* Upgrade de plano */}
+              {plano !== 'premium' && (
+                <div className="admin-card" style={{ background: 'linear-gradient(135deg, #1565C0, #0D47A1)', color: '#fff', textAlign: 'center' }}>
+                  <h4 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: 8 }}>🚀 Fazer upgrade</h4>
+                  <p style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: 16 }}>
+                    {plano === 'free'
+                      ? 'Libere cores, fontes, upload e remova a marca d\'água.'
+                      : 'Libere banners de monetização e suporte prioritário.'}
+                  </p>
+                  <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+                    {plano === 'free' && (
+                      <button
+                        className="landing-plano-btn"
+                        style={{ background: '#fff', color: '#1565C0', width: 'auto', padding: '10px 20px' }}
+                        onClick={async () => {
+                          const res = await fetch('/api/checkout', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ plano: 'basic', radioSlug: radioSlug, email: user?.email }),
+                          });
+                          const data = await res.json();
+                          if (data.url) window.location.href = data.url;
+                          else alert(data.error || 'Erro ao criar checkout');
+                        }}
+                      >
+                        Básico — R$49/mês
+                      </button>
+                    )}
+                    <button
+                      className="landing-plano-btn"
+                      style={{ background: plano === 'free' ? 'rgba(255,255,255,0.2)' : '#fff', color: plano === 'free' ? '#fff' : '#1565C0', width: 'auto', padding: '10px 20px', border: '1px solid rgba(255,255,255,0.4)' }}
+                      onClick={async () => {
+                        const res = await fetch('/api/checkout', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ plano: 'premium', radioSlug: radioSlug, email: user?.email }),
+                        });
+                        const data = await res.json();
+                        if (data.url) window.location.href = data.url;
+                        else alert(data.error || 'Erro ao criar checkout');
+                      }}
+                    >
+                      Premium — R$99/mês
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Info da rádio */}
               <div className="admin-card">
                 <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: 12 }}>📻 Informações da Rádio</h4>
