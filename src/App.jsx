@@ -36,14 +36,16 @@ const TABS = [
 
 function App() {
   // Detecta se deve mostrar a landing page
-  const showLanding = new URLSearchParams(window.location.search).has('landing')
-    || (!new URLSearchParams(window.location.search).has('radio') && window.location.hostname === 'localhost' && !window.location.hostname.includes('.'));
+  const params = new URLSearchParams(window.location.search);
+  const hostname = window.location.hostname;
+  const isLanding = params.has('landing')
+    || (hostname.includes('radionaoya.com.br') && !params.has('radio'));
 
   // Multi-tenant: carrega config da rádio pela API
   const { config: radioConfig, loading: configLoading, slug } = useRadioConfig();
 
   // Se é a landing page, renderiza ela
-  if (new URLSearchParams(window.location.search).has('landing')) {
+  if (isLanding) {
     return <LandingPage />;
   }
 
