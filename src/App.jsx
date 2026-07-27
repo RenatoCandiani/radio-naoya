@@ -92,7 +92,7 @@ function App() {
   });
 
   const audioRef = useRef(null);
-  const nowPlaying = useNowPlaying(isPlaying, 30000, radioData.metadadosUrl, adminData.programacao);
+  const nowPlaying = useNowPlaying(isPlaying, 30000, radioData.metadadosUrl, radioData.programacao);
 
   // Cria o audio element uma única vez
   useEffect(() => {
