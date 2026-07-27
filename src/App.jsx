@@ -24,6 +24,7 @@ import { TabHistoria } from './components/TabHistoria';
 import { TabContatos } from './components/TabContatos';
 import { TabLocutores } from './components/TabLocutores';
 import { TabComercial } from './components/TabComercial';
+import { TemplateModerno } from './templates/Moderno';
 
 const TABS = [
   { id: 'home',        label: 'Início' },
@@ -125,6 +126,9 @@ function App() {
     radioData.bannersPremium || BANNERS_PREMIUM
   );
 
+  // Detecta template (query param ou config da rádio)
+  const template = params.get('template') || radioData.template || 'classico';
+
   // Atualiza src quando stream muda
   useEffect(() => {
     const audio = audioRef.current;
@@ -157,6 +161,11 @@ function App() {
   };
 
   const whatsappHref = `https://wa.me/${radioData.whatsapp}?text=Ol%C3%A1%2C%20quero%20pedir%20uma%20m%C3%BAsica!`;
+
+  // Template moderno
+  if (template === 'moderno') {
+    return <TemplateModerno radioData={radioData} streams={streams} nowPlaying={nowPlaying} adminData={adminData} />;
+  }
 
   return (
     <div className="App">

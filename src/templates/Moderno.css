@@ -1,0 +1,409 @@
+/* ============================================================
+   TEMPLATE MODERNO — One-page animado
+   ============================================================ */
+
+.moderno {
+  min-height: 100vh;
+  background: #0c1929;
+  color: var(--cor-texto, #e0e0e0);
+  font-family: var(--fonte-principal, 'Segoe UI', system-ui, sans-serif);
+  overflow-x: hidden;
+}
+
+/* ===== ANIMAÇÕES ===== */
+.moderno-animate {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.moderno-animate.moderno-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Float animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.moderno-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Scroll hint bounce */
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); opacity: 0.6; }
+  50% { transform: translateY(10px); opacity: 1; }
+}
+
+/* Pulse glow */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(255,255,255,0.1); }
+  50% { box-shadow: 0 0 40px rgba(255,255,255,0.25); }
+}
+
+/* ===== HERO ===== */
+.moderno-hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.moderno-hero-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, #0d2137 0%, #0c1929 40%, #102a43 100%);
+}
+
+.moderno-hero-particles {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(2px 2px at 20% 30%, rgba(255,255,255,0.3) 0%, transparent 100%),
+    radial-gradient(2px 2px at 40% 70%, rgba(255,255,255,0.2) 0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 20%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 80% 50%, rgba(255,255,255,0.2) 0%, transparent 100%),
+    radial-gradient(2px 2px at 10% 80%, rgba(255,255,255,0.15) 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 10%, rgba(255,255,255,0.3) 0%, transparent 100%);
+  animation: float 8s ease-in-out infinite;
+}
+
+.moderno-hero-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 24px;
+  color: #fff;
+}
+
+.moderno-logo {
+  height: 120px;
+  width: auto;
+  margin-bottom: 20px;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+.moderno-title-glitch {
+  font-size: 3.2rem;
+  font-weight: 900;
+  font-family: var(--fonte-titulos, inherit);
+  margin-bottom: 4px;
+  letter-spacing: -1px;
+  text-shadow: 0 2px 20px rgba(255,255,255,0.15);
+}
+
+.moderno-freq {
+  font-size: 1.2rem;
+  opacity: 0.7;
+  display: block;
+  margin-bottom: 32px;
+  letter-spacing: 2px;
+}
+
+.moderno-play-btn {
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255,255,255,0.3);
+  color: #fff;
+  border-radius: 50px;
+  padding: 16px 40px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+.moderno-play-btn:hover {
+  background: rgba(255,255,255,0.2);
+  border-color: rgba(255,255,255,0.6);
+  transform: scale(1.05);
+}
+.moderno-play-btn.tocando {
+  background: #25D366;
+  border-color: #25D366;
+  animation: none;
+}
+
+.moderno-play-icon {
+  font-size: 1.3rem;
+}
+
+.moderno-now-playing {
+  margin-top: 20px;
+  font-size: 0.9rem;
+  opacity: 0.7;
+  animation: float 3s ease-in-out infinite;
+}
+
+.moderno-scroll-hint {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.5rem;
+  opacity: 0.5;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+/* ===== SEÇÕES ===== */
+.moderno-section {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 80px 24px;
+}
+
+.moderno-section h2 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-bottom: 32px;
+  font-family: var(--fonte-titulos, inherit);
+  color: var(--cor-primaria, #4fc3f7);
+}
+
+.moderno-section-alt {
+  background: rgba(255,255,255,0.03);
+  max-width: 100%;
+  padding: 80px 24px;
+}
+.moderno-section-alt > div {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* ===== PROGRAMAÇÃO ===== */
+.moderno-prog-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.moderno-prog-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+}
+.moderno-prog-item:hover {
+  background: rgba(255,255,255,0.1);
+  transform: translateX(8px);
+  border-color: var(--cor-primaria, #4fc3f7);
+}
+
+.moderno-prog-time {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--cor-primaria, #4fc3f7);
+  min-width: 120px;
+  font-variant-numeric: tabular-nums;
+}
+
+.moderno-prog-item strong {
+  display: block;
+  font-size: 0.95rem;
+  color: #fff;
+}
+
+.moderno-prog-locutor {
+  display: block;
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.5);
+  margin-top: 2px;
+}
+
+/* ===== LOCUTORES ===== */
+.moderno-locutores-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 20px;
+  text-align: center;
+}
+
+.moderno-locutor-card {
+  padding: 24px 16px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: all 0.3s ease;
+}
+.moderno-locutor-card:hover {
+  transform: translateY(-6px);
+  background: rgba(255,255,255,0.1);
+  border-color: var(--cor-primaria, #4fc3f7);
+}
+
+.moderno-locutor-foto {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 12px;
+  border: 3px solid var(--cor-primaria, #4fc3f7);
+}
+
+.moderno-locutor-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--cor-primaria, #1565C0);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.moderno-locutor-card h3 {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.moderno-locutor-funcao {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ===== NOTÍCIAS ===== */
+.moderno-news-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.moderno-news-card {
+  background: rgba(255,255,255,0.05);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: all 0.3s ease;
+}
+.moderno-news-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--cor-primaria, #4fc3f7);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+}
+
+.moderno-news-card img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+
+.moderno-news-body {
+  padding: 18px;
+}
+.moderno-news-body h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #fff;
+}
+.moderno-news-body p {
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.6);
+  line-height: 1.5;
+}
+
+/* ===== HISTÓRIA ===== */
+.moderno-historia {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: rgba(255,255,255,0.7);
+  max-width: 700px;
+}
+
+/* ===== PATROCINADORES ===== */
+.moderno-patrocinadores {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 14px;
+}
+
+.moderno-pat-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  text-decoration: none;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: all 0.3s ease;
+}
+.moderno-pat-card:hover {
+  transform: translateX(6px);
+  background: rgba(255,255,255,0.1);
+}
+
+.moderno-pat-emoji {
+  font-size: 1.5rem;
+}
+.moderno-pat-card strong {
+  display: block;
+  font-size: 0.92rem;
+}
+.moderno-pat-card span {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.5);
+}
+
+/* ===== FOOTER ===== */
+.moderno-footer {
+  text-align: center;
+  padding: 50px 24px;
+  background: rgba(0,0,0,0.3);
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+.moderno-footer p {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #fff;
+}
+
+.moderno-whatsapp {
+  display: inline-block;
+  background: #25D366;
+  color: #fff;
+  padding: 12px 28px;
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(37, 211, 102, 0.3);
+}
+.moderno-whatsapp:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(37, 211, 102, 0.4);
+}
+
+/* ===== RESPONSIVO ===== */
+@media (max-width: 600px) {
+  .moderno-title-glitch { font-size: 2rem; }
+  .moderno-hero { min-height: 90vh; }
+  .moderno-section { padding: 50px 16px; }
+  .moderno-section-alt { padding: 50px 16px; }
+  .moderno-prog-item { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .moderno-prog-time { min-width: auto; }
+  .moderno-locutores-grid { grid-template-columns: repeat(2, 1fr); }
+  .moderno-logo { height: 80px; }
+}

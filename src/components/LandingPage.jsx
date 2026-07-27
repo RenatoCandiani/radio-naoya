@@ -40,11 +40,10 @@ export function LandingPage() {
       const { data: authData, error: authErr } = await supabase.auth.signUp({ email, password: senha });
       if (authErr) throw new Error(authErr.message);
 
-      // 2. Cria a rádio
+      // 2. Cria a rádio (sem owner_id — será vinculado no primeiro login)
       const { error: radioErr } = await supabase.from('radios').insert({
         slug: safeSlug,
         nome: nomeRadio,
-        owner_id: authData.user?.id,
         plano: 'free',
         tema: { corPrimaria: '#1565C0', corSecundaria: '#0D47A1', corFundo: '#F0F4F8', corCards: '#ffffff', corTexto: '#333333' },
         streams: [],
