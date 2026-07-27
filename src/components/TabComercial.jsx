@@ -1,5 +1,15 @@
-export function TabComercial() {
-  const whatsappLink = 'https://wa.me/555599021126?text=Olá, quero anunciar na Rádio Marajá!';
+export function TabComercial({ whatsapp, nome }) {
+  if (!whatsapp) {
+    return (
+      <div className="animate-fade-in" style={{ textAlign: 'center', padding: '60px 20px', color: '#888' }}>
+        <div style={{ fontSize: '3rem', marginBottom: '16px' }}>💼</div>
+        <h3 style={{ fontSize: '1.2rem', marginBottom: '8px', color: '#555' }}>Página comercial</h3>
+        <p style={{ fontSize: '0.9rem' }}>Configure o WhatsApp no admin para habilitar contato comercial.</p>
+      </div>
+    );
+  }
+
+  const whatsappLink = `https://wa.me/${whatsapp}?text=Olá, quero anunciar na ${nome || 'rádio'}!`;
 
   const planos = [
     {
@@ -48,8 +58,8 @@ export function TabComercial() {
   return (
     <div className="animate-fade-in">
       <div className="section-header">
-        <h2>Anuncie na Marajá</h2>
-        <span className="section-sub">Alcance milhares de ouvintes na Fronteira Oeste</span>
+        <h2>Anuncie na {nome || 'Rádio'}</h2>
+        <span className="section-sub">Alcance milhares de ouvintes</span>
       </div>
 
       <div className="comercial-grid">

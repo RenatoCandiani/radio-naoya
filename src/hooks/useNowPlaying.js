@@ -38,24 +38,41 @@ function getProgramaAtual() {
  *
  * Quando não há metadados, usa a programação do dia/hora como fallback.
  */
-export function useNowPlaying(isPlaying, interval = 30000) {
-  const [nowPlaying, setNowPlaying] = useState(getProgramaAtual);
+export function useNowPlaying(isPlaying, interval = 30000, metadadosUrl = null, programacao = null) {
+  function getProgramaAtualLocal() {
+    const prog = programacao || PROGRAMACAO;
+    const now = new Date();
+    const dia = now.getDay();
+    const horaAtual = now.getHours() * 60 + now.getMinutes();
+
+    const grade = prog[dia] || [];
+    for (const p of grade) {
+      const match = p.time.match(/(\d{2}):(\d{2})\s*[–-]\s*(\d{2}):(\d{2})/);
+      if (!match) continue;
+      const inicio = parseInt(match[1]) * 60 + parseInt(match[2]);
+      const fim = parseInt(match[3]) * 60 + parseInt(match[4]);
+      if (horaAtual >= inicio && horaAtual < fim) {
+        return { titulo: p.show, artista: p.locutor ? `com ${p.locutor}` : 'Ao vivo' };
+      }
+    }
+    return { titulo: 'Programação', artista: 'Ao vivo' };
+  }
+
+  const [nowPlaying, setNowPlaying] = useState(getProgramaAtualLocal);
   const timerRef = useRef(null);
 
-  // Atualiza o fallback da programação a cada minuto
   useEffect(() => {
     const progTimer = setInterval(() => {
       setNowPlaying((prev) => {
-        // Só atualiza se estiver no modo fallback (sem metadado externo ativo)
-        if (!prev._fromApi) return getProgramaAtual();
+        if (!prev._fromApi) return getProgramaAtualLocal();
         return prev;
       });
     }, 60000);
     return () => clearInterval(progTimer);
-  }, []);
+  }, [programacao]);
 
   const fetchMeta = async () => {
-    const url = RADIO_CONFIG.metadadosUrl;
+    const url = metadadosUrl || RADIO_CONFIG.metadadosUrl;
     if (!url) return;
 
     try {
@@ -96,8 +113,8 @@ export function useNowPlaying(isPlaying, interval = 30000) {
     } catch {
       // texto puro (Shoutcast) ou erro de rede — tenta como texto
       try {
-        const res = await fetch(RADIO_CONFIG.metadadosUrl, { cache: 'no-store' });
-        const text = await res.text();
+        const res2 = await fetch(metadadosUrl || RADIO_CONFIG.metadadosUrl, { cache: 'no-store' });
+        const text = await res2.text();
         const trimmed = text.trim();
         if (trimmed) {
           const [artista, ...resto] = trimmed.split(' - ');
@@ -109,14 +126,15 @@ export function useNowPlaying(isPlaying, interval = 30000) {
         }
       } catch {
         // rede indisponível — usa programação
-        setNowPlaying(getProgramaAtual());
+        setNowPlaying(getProgramaAtualLocal());
       }
     }
   };
 
   useEffect(() => {
-    if (!RADIO_CONFIG.metadadosUrl || !isPlaying) {
-      setNowPlaying(getProgramaAtual());
+    const url = metadadosUrl || RADIO_CONFIG.metadadosUrl;
+    if (!url || !isPlaying) {
+      setNowPlaying(getProgramaAtualLocal());
       return;
     }
 

@@ -92,7 +92,7 @@ function App() {
   });
 
   const audioRef = useRef(null);
-  const nowPlaying = useNowPlaying(isPlaying);
+  const nowPlaying = useNowPlaying(isPlaying, 30000, radioData.metadadosUrl, adminData.programacao);
 
   // Cria o audio element uma única vez
   useEffect(() => {
@@ -240,8 +240,8 @@ function App() {
           {activeTab === 'programacao' && <TabProgramacao programacao={adminData.programacao} />}
           {activeTab === 'locutores'   && <TabLocutores locutores={radioData.locutores} />}
           {activeTab === 'historia'    && <TabHistoria radioData={radioData} />}
-          {activeTab === 'comercial'   && <TabComercial />}
-          {activeTab === 'contatos'    && <TabContatos whatsappHref={whatsappHref} />}
+          {activeTab === 'comercial'   && <TabComercial whatsapp={radioData.whatsapp} nome={radioData.nome} />}
+          {activeTab === 'contatos'    && <TabContatos whatsappHref={whatsappHref} whatsapp={radioData.whatsapp} />}
         </main>
       </div>
 
