@@ -17,10 +17,10 @@ const DIAS_LABEL = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta',
 // ============================================================
 export function useAdminData(fallbackNoticias, fallbackProgramacao, fallbackPatrocinadores, fallbackBanner) {
   return {
-    noticias: (fallbackNoticias && fallbackNoticias.length > 0) ? fallbackNoticias : DEFAULT_NOTICIAS,
-    programacao: (fallbackProgramacao && Object.keys(fallbackProgramacao).length > 0) ? fallbackProgramacao : DEFAULT_PROGRAMACAO,
-    patrocinadores: (fallbackPatrocinadores && fallbackPatrocinadores.length > 0) ? fallbackPatrocinadores : DEFAULT_PATROCINADORES,
-    banner: (fallbackBanner && fallbackBanner.length > 0) ? fallbackBanner : DEFAULT_BANNERS,
+    noticias: fallbackNoticias || [],
+    programacao: fallbackProgramacao || {},
+    patrocinadores: fallbackPatrocinadores || [],
+    banner: fallbackBanner || [],
   };
 }
 
