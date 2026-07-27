@@ -1,18 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
-import { RADIO_CONFIG, PROGRAMACAO } from '../data/config';
 
 /**
- * Detecta o programa atual baseado no dia/hora.
+ * Detecta o programa atual baseado na programação e hora.
  */
-function getProgramaAtual() {
-  const now = new Date();
-  const dia = now.getDay(); // 0=Dom ... 6=Sab
-  const horaAtual = now.getHours() * 60 + now.getMinutes(); // minutos desde 00:00
+function getProgramaAtual(programacao) {
+  if (!programacao || typeof programacao !== 'object') {
+    return { titulo: 'Programação', artista: 'Ao vivo' };
+  }
 
-  const grade = PROGRAMACAO[dia] || [];
+  const now = new Date();
+  const dia = now.getDay();
+  const horaAtual = now.getHours() * 60 + now.getMinutes();
+
+  const grade = programacao[dia] || [];
   for (const prog of grade) {
-    // Parse "HH:MM – HH:MM"
-    const match = prog.time.match(/(\d{2}):(\d{2})\s*[–-]\s*(\d{2}):(\d{2})/);
+    const match = prog.time?.match(/(\d{2}):(\d{2})\s*[–-]\s*(\d{2}):(\d{2})/);
     if (!match) continue;
     const inicio = parseInt(match[1]) * 60 + parseInt(match[2]);
     const fim = parseInt(match[3]) * 60 + parseInt(match[4]);
@@ -23,48 +25,22 @@ function getProgramaAtual() {
       };
     }
   }
-  return {
-    titulo: RADIO_CONFIG.nome,
-    artista: 'Ao vivo',
-  };
+  return { titulo: 'Programação', artista: 'Ao vivo' };
 }
 
 /**
  * Hook que faz polling dos metadados do stream.
- * Suporta:
- *  - BRLogic/MinhaWebRadio (currentTrack com artist/title)
- *  - Icecast status-json.xsl
- *  - Shoutcast currentsong (texto puro)
- *
- * Quando não há metadados, usa a programação do dia/hora como fallback.
  */
 export function useNowPlaying(isPlaying, interval = 30000, metadadosUrl = null, programacao = null) {
-  function getProgramaAtualLocal() {
-    const prog = programacao || PROGRAMACAO;
-    const now = new Date();
-    const dia = now.getDay();
-    const horaAtual = now.getHours() * 60 + now.getMinutes();
-
-    const grade = prog[dia] || [];
-    for (const p of grade) {
-      const match = p.time.match(/(\d{2}):(\d{2})\s*[–-]\s*(\d{2}):(\d{2})/);
-      if (!match) continue;
-      const inicio = parseInt(match[1]) * 60 + parseInt(match[2]);
-      const fim = parseInt(match[3]) * 60 + parseInt(match[4]);
-      if (horaAtual >= inicio && horaAtual < fim) {
-        return { titulo: p.show, artista: p.locutor ? `com ${p.locutor}` : 'Ao vivo' };
-      }
-    }
-    return { titulo: 'Programação', artista: 'Ao vivo' };
-  }
-
-  const [nowPlaying, setNowPlaying] = useState(getProgramaAtualLocal);
+  const [nowPlaying, setNowPlaying] = useState({ titulo: 'Programação', artista: 'Ao vivo' });
   const timerRef = useRef(null);
 
+  // Atualiza pelo programa atual a cada minuto
   useEffect(() => {
+    setNowPlaying(getProgramaAtual(programacao));
     const progTimer = setInterval(() => {
       setNowPlaying((prev) => {
-        if (!prev._fromApi) return getProgramaAtualLocal();
+        if (!prev._fromApi) return getProgramaAtual(programacao);
         return prev;
       });
     }, 60000);
@@ -72,14 +48,13 @@ export function useNowPlaying(isPlaying, interval = 30000, metadadosUrl = null, 
   }, [programacao]);
 
   const fetchMeta = async () => {
-    const url = metadadosUrl || RADIO_CONFIG.metadadosUrl;
-    if (!url) return;
+    if (!metadadosUrl) return;
 
     try {
-      const res = await fetch(url, { cache: 'no-store' });
+      const res = await fetch(metadadosUrl, { cache: 'no-store' });
       const json = await res.json();
 
-      // --- Formato BRLogic: { currentTrack: { artist, title } | false } ---
+      // Formato BRLogic
       if ('currentTrack' in json) {
         if (json.currentTrack && json.currentTrack.title) {
           setNowPlaying({
@@ -88,13 +63,12 @@ export function useNowPlaying(isPlaying, interval = 30000, metadadosUrl = null, 
             _fromApi: true,
           });
         } else {
-          // currentTrack: false → sem metadado, usa programação
-          setNowPlaying(getProgramaAtual());
+          setNowPlaying(getProgramaAtual(programacao));
         }
         return;
       }
 
-      // --- Formato Icecast status-json.xsl ---
+      // Formato Icecast
       const source = json?.icestats?.source;
       if (source) {
         const src = Array.isArray(source) ? source[0] : source;
@@ -109,11 +83,10 @@ export function useNowPlaying(isPlaying, interval = 30000, metadadosUrl = null, 
         }
         return;
       }
-
     } catch {
-      // texto puro (Shoutcast) ou erro de rede — tenta como texto
+      // Tenta como texto (Shoutcast)
       try {
-        const res2 = await fetch(metadadosUrl || RADIO_CONFIG.metadadosUrl, { cache: 'no-store' });
+        const res2 = await fetch(metadadosUrl, { cache: 'no-store' });
         const text = await res2.text();
         const trimmed = text.trim();
         if (trimmed) {
@@ -125,24 +98,21 @@ export function useNowPlaying(isPlaying, interval = 30000, metadadosUrl = null, 
           });
         }
       } catch {
-        // rede indisponível — usa programação
-        setNowPlaying(getProgramaAtualLocal());
+        setNowPlaying(getProgramaAtual(programacao));
       }
     }
   };
 
   useEffect(() => {
-    const url = metadadosUrl || RADIO_CONFIG.metadadosUrl;
-    if (!url || !isPlaying) {
-      setNowPlaying(getProgramaAtualLocal());
+    if (!metadadosUrl || !isPlaying) {
+      setNowPlaying(getProgramaAtual(programacao));
       return;
     }
 
     fetchMeta();
     timerRef.current = setInterval(fetchMeta, interval);
-
     return () => clearInterval(timerRef.current);
-  }, [isPlaying, interval]);
+  }, [isPlaying, metadadosUrl, interval]);
 
   return nowPlaying;
 }
