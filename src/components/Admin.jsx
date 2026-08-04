@@ -46,6 +46,7 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
   const [programacao, setProgramacao] = useState({});
   const [patrocinadores, setPatrocinadores] = useState([]);
   const [locutores, setLocutores] = useState([]);
+  const [planosComerciais, setPlanosComerciais] = useState([]);
   const [radioInfo, setRadioInfo] = useState({});
   const [diaSel, setDiaSel] = useState(new Date().getDay());
 
@@ -112,6 +113,14 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
       .eq('radio_id', radio.id)
       .order('ordem');
     if (pats) setPatrocinadores(pats);
+
+    // Carrega planos comerciais
+    const { data: plComerciais } = await supabase
+      .from('planos_comerciais')
+      .select('*')
+      .eq('radio_id', radio.id)
+      .order('ordem');
+    if (plComerciais) setPlanosComerciais(plComerciais);
   }
 
   // ---- Login ----
@@ -206,6 +215,22 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
             programas: l.programas || [],
             descricao: l.descricao || '',
             foto_url: l.foto_url || '',
+          }))
+        );
+      }
+
+      // Salva planos comerciais — deleta e reinsere
+      await supabase.from('planos_comerciais').delete().eq('radio_id', radioId);
+      if (planosComerciais.length > 0) {
+        await supabase.from('planos_comerciais').insert(
+          planosComerciais.map((p, idx) => ({
+            radio_id: radioId,
+            nome: p.nome,
+            descricao: p.descricao || '',
+            preco: p.preco,
+            itens: p.itens || [],
+            destaque: !!p.destaque,
+            ordem: idx,
           }))
         );
       }
@@ -401,6 +426,7 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
             { id: 'programacao',    label: '🕐 Programação' },
             { id: 'locutores',      label: '🎙️ Locutores' },
             { id: 'patrocinadores', label: '✨ Patrocinadores' },
+            { id: 'comercial',      label: '💼 Comercial' },
           ].map((a) => (
             <button
               key={a.id}
@@ -995,6 +1021,87 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
                       <input className="admin-input" value={p.href} onChange={(e) => updatePat(idx, 'href', e.target.value)} placeholder="https://..." />
                     </div>
                   </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* ===== COMERCIAL ===== */}
+          {aba === 'comercial' && (
+            <div>
+              <div className="admin-secao-header">
+                <h3>Planos Comerciais</h3>
+                <button className="admin-btn-add" onClick={() => setPlanosComerciais([...planosComerciais, { nome: '', descricao: '', preco: '', itens: [], destaque: false }])}>+ Adicionar</button>
+              </div>
+              {planosComerciais.map((p, idx) => (
+                <div key={idx} className="admin-card">
+                  <div className="admin-card-header">
+                    <span className="admin-card-num">#{idx + 1}</span>
+                    <label className="admin-destaque-label">
+                      <input
+                        type="checkbox"
+                        checked={!!p.destaque}
+                        onChange={(e) => {
+                          const arr = [...planosComerciais];
+                          arr[idx] = { ...arr[idx], destaque: e.target.checked };
+                          setPlanosComerciais(arr);
+                        }}
+                      />
+                      Destaque
+                    </label>
+                    <button className="admin-btn-remove" onClick={() => setPlanosComerciais(planosComerciais.filter((_, i) => i !== idx))}>✕</button>
+                  </div>
+                  <div className="admin-prog-row">
+                    <div style={{ flex: 2 }}>
+                      <label className="admin-field-label">Nome do Plano</label>
+                      <input
+                        className="admin-input"
+                        value={p.nome}
+                        onChange={(e) => {
+                          const arr = [...planosComerciais];
+                          arr[idx] = { ...arr[idx], nome: e.target.value };
+                          setPlanosComerciais(arr);
+                        }}
+                        placeholder="Ex: Apoio Cultural"
+                      />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <label className="admin-field-label">Preço</label>
+                      <input
+                        className="admin-input"
+                        value={p.preco}
+                        onChange={(e) => {
+                          const arr = [...planosComerciais];
+                          arr[idx] = { ...arr[idx], preco: e.target.value };
+                          setPlanosComerciais(arr);
+                        }}
+                        placeholder="R$ 150/mês"
+                      />
+                    </div>
+                  </div>
+                  <label className="admin-field-label">Descrição</label>
+                  <input
+                    className="admin-input"
+                    value={p.descricao}
+                    onChange={(e) => {
+                      const arr = [...planosComerciais];
+                      arr[idx] = { ...arr[idx], descricao: e.target.value };
+                      setPlanosComerciais(arr);
+                    }}
+                    placeholder="Breve descrição do plano"
+                  />
+                  <label className="admin-field-label">Itens inclusos (um por linha)</label>
+                  <textarea
+                    className="admin-input admin-textarea"
+                    value={(p.itens || []).join('\n')}
+                    onChange={(e) => {
+                      const arr = [...planosComerciais];
+                      arr[idx] = { ...arr[idx], itens: e.target.value.split('\n').filter(Boolean) };
+                      setPlanosComerciais(arr);
+                    }}
+                    rows={4}
+                    placeholder={"Item 1\nItem 2\nItem 3"}
+                  />
                 </div>
               ))}
             </div>

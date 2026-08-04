@@ -246,7 +246,7 @@ function App() {
           {activeTab === 'programacao' && <TabProgramacao programacao={adminData.programacao} />}
           {activeTab === 'locutores'   && <TabLocutores locutores={radioData.locutores} />}
           {activeTab === 'historia'    && <TabHistoria radioData={radioData} />}
-          {activeTab === 'comercial'   && <TabComercial whatsapp={radioData.whatsapp} nome={radioData.nome} />}
+          {activeTab === 'comercial'   && <TabComercial whatsapp={radioData.whatsapp} nome={radioData.nome} planosComerciais={radioData.planosComerciais} />}
           {activeTab === 'contatos'    && <TabContatos whatsappHref={whatsappHref} whatsapp={radioData.whatsapp} />}
         </main>
       </div>

@@ -101,12 +101,14 @@ export function useRadioConfig() {
           { data: noticias },
           { data: patrocinadores },
           { data: banners },
+          { data: planosComerciais },
         ] = await Promise.all([
           supabase.from('programacao').select('*').eq('radio_id', radio.id).order('ordem'),
           supabase.from('locutores').select('*').eq('radio_id', radio.id),
           supabase.from('noticias').select('*').eq('radio_id', radio.id).order('created_at', { ascending: false }),
           supabase.from('patrocinadores').select('*').eq('radio_id', radio.id).order('ordem'),
           supabase.from('banners').select('*').eq('radio_id', radio.id).order('ordem'),
+          supabase.from('planos_comerciais').select('*').eq('radio_id', radio.id).order('ordem'),
         ]);
 
         // Agrupa programação por dia
@@ -170,6 +172,7 @@ export function useRadioConfig() {
             noticias: noticiasFormatted,
             bannersPremium: bannersFormatted,
             patrocinadores: patFormatted,
+            planosComerciais: planosComerciais || [],
             plano: radio.plano || 'free',
           });
         }
