@@ -50,20 +50,21 @@ function App() {
     return <LandingPage />;
   }
 
-  // Usa dados da API ou fallback local (sem tela de loading)
+  // Usa dados da API ou fallback vazio (loading)
   const radioData = radioConfig || {
-    nome: RADIO_CONFIG.nome,
-    frequencia: RADIO_CONFIG.frequencia,
-    logo: RADIO_CONFIG.logo,
-    whatsapp: RADIO_CONFIG.whatsapp,
-    metadadosUrl: RADIO_CONFIG.metadadosUrl,
-    historia: RADIO_CONFIG.historia,
-    streams: STREAMS,
-    programacao: PROGRAMACAO,
-    noticias: NOTICIAS,
+    nome: '',
+    frequencia: '',
+    logo: '',
+    whatsapp: '',
+    metadadosUrl: '',
+    historia: '',
+    streams: [],
+    programacao: {},
+    noticias: [],
     locutores: [],
-    bannersPremium: BANNERS_PREMIUM,
-    patrocinadores: PATROCINADORES,
+    bannersPremium: [],
+    patrocinadores: [],
+    planosComerciais: [],
     tema: null,
   };
 
@@ -161,6 +162,18 @@ function App() {
   };
 
   const whatsappHref = `https://wa.me/${radioData.whatsapp}?text=Ol%C3%A1%2C%20quero%20pedir%20uma%20m%C3%BAsica!`;
+
+  // Tela de loading enquanto Supabase carrega
+  if (configLoading || !radioConfig) {
+    return (
+      <div className="App" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#f0f4f8' }}>
+        <div style={{ textAlign: 'center', color: '#888' }}>
+          <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>📻</div>
+          <p style={{ fontSize: '0.95rem' }}>Carregando...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Template moderno
   if (template === 'moderno') {
