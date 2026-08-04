@@ -173,11 +173,17 @@ function App() {
       {/* ===== HEADER ===== */}
       <header className="header">
         <div className="logo-area">
-          <img
-            src={radioData.logo}
-            alt={`Logo ${radioData.nome}`}
-            className="logo-img"
-          />
+          {radioData.logo ? (
+            <img
+              src={radioData.logo}
+              alt={`Logo ${radioData.nome}`}
+              className="logo-img"
+            />
+          ) : (
+            <span style={{ color: '#fff', fontWeight: 800, fontSize: '1.2rem' }}>
+              {radioData.nome || 'Sua Rádio'}
+            </span>
+          )}
         </div>
         <div className="header-actions">
           {/* Botão dark mode */}
@@ -218,9 +224,9 @@ function App() {
           target="_blank"
           rel="noreferrer"
           className="nav-btn btn-whatsapp"
-          aria-label="Pedir música pelo WhatsApp"
+          aria-label="Nos contate pelo WhatsApp"
         >
-          📱 Pedir Música
+          📱 Nos Contate
         </a>
       </nav>
 

@@ -141,6 +141,7 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
         frequencia: radioInfo.frequencia,
         whatsapp: radioInfo.whatsapp,
         historia: radioInfo.historia,
+        logo_url: radioInfo.logo_url,
         tema: radioInfo.tema,
         updated_at: new Date().toISOString(),
       }).eq('id', radioId);
@@ -494,6 +495,40 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
               {/* Info da rádio */}
               <div className="admin-card">
                 <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: 12 }}>📻 Informações da Rádio</h4>
+
+                {/* Logo */}
+                <label className="admin-field-label">Logo da Rádio</label>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 14 }}>
+                  {radioInfo.logo_url ? (
+                    <img src={radioInfo.logo_url} alt="Logo" style={{ height: 50, borderRadius: 8 }} />
+                  ) : (
+                    <div style={{ height: 50, width: 50, background: '#eee', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#aaa', fontSize: '0.75rem' }}>Sem logo</div>
+                  )}
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', flex: 1 }}>
+                    <input
+                      className="admin-input"
+                      value={radioInfo.logo_url || ''}
+                      onChange={(e) => setRadioInfo({ ...radioInfo, logo_url: e.target.value })}
+                      placeholder="URL da logo ou faça upload →"
+                      style={{ flex: 1, marginBottom: 0 }}
+                    />
+                    <label className="admin-btn-upload">
+                      📁
+                      <input
+                        type="file"
+                        accept="image/*"
+                        hidden
+                        onChange={async (e) => {
+                          const file = e.target.files[0];
+                          if (!file) return;
+                          const url = await uploadImage(file, 'logos');
+                          if (url) setRadioInfo({ ...radioInfo, logo_url: url });
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
+
                 <div className="admin-prog-row">
                   <div style={{ flex: 2 }}>
                     <label className="admin-field-label">Nome</label>

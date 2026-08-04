@@ -57,7 +57,7 @@ export function LandingPage() {
       }
 
       setFormStatus('success');
-      setFormMsg(`Rádio "${nomeRadio}" criada! Verifique seu email para confirmar a conta. Depois acesse com ?radio=${safeSlug}`);
+      setFormMsg(`Sua rádio "${nomeRadio}" foi criada com sucesso!\n\nAcesse seu site em:\nradionaoya.com.br?radio=${safeSlug}\n\nVerifique seu email para confirmar a conta e faça login no admin (⚙️) para configurar tudo.`);
     } catch (err) {
       setFormStatus('error');
       setFormMsg(err.message);
