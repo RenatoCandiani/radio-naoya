@@ -1254,12 +1254,10 @@ button {
   top: 0;
   background: var(--cor-cards, #fff);
   z-index: 10;
-  scrollbar-width: thin;
-  scrollbar-color: #ccc transparent;
+  scrollbar-width: none;
+  padding-bottom: 2px;
 }
-.admin-abas::-webkit-scrollbar { height: 4px; }
-.admin-abas::-webkit-scrollbar-track { background: transparent; }
-.admin-abas::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+.admin-abas::-webkit-scrollbar { display: none; }
 
 .admin-aba {
   padding: 12px 18px;
