@@ -418,24 +418,28 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
         </div>
 
         {/* Abas */}
-        <div className="admin-abas">
-          {[
-            { id: 'dashboard',      label: '📊 Dashboard' },
-            { id: 'aparencia',      label: '🎨 Aparência' },
-            { id: 'noticias',       label: '📰 Notícias' },
-            { id: 'programacao',    label: '🕐 Programação' },
-            { id: 'locutores',      label: '🎙️ Locutores' },
-            { id: 'patrocinadores', label: '✨ Patrocinadores' },
-            { id: 'comercial',      label: '💼 Comercial' },
-          ].map((a) => (
-            <button
-              key={a.id}
-              className={`admin-aba${aba === a.id ? ' ativa' : ''}`}
-              onClick={() => setAba(a.id)}
-            >
-              {a.label}
-            </button>
-          ))}
+        <div className="admin-abas-wrapper">
+          <button className="admin-abas-arrow admin-abas-arrow-left" onClick={() => { document.querySelector('.admin-abas').scrollBy({ left: -120, behavior: 'smooth' }); }}>‹</button>
+          <div className="admin-abas">
+            {[
+              { id: 'dashboard',      label: '📊 Dashboard' },
+              { id: 'aparencia',      label: '🎨 Aparência' },
+              { id: 'noticias',       label: '📰 Notícias' },
+              { id: 'programacao',    label: '🕐 Programação' },
+              { id: 'locutores',      label: '🎙️ Locutores' },
+              { id: 'patrocinadores', label: '✨ Patrocinadores' },
+              { id: 'comercial',      label: '💼 Comercial' },
+            ].map((a) => (
+              <button
+                key={a.id}
+                className={`admin-aba${aba === a.id ? ' ativa' : ''}`}
+                onClick={() => setAba(a.id)}
+              >
+                {a.label}
+              </button>
+            ))}
+          </div>
+          <button className="admin-abas-arrow admin-abas-arrow-right" onClick={() => { document.querySelector('.admin-abas').scrollBy({ left: 120, behavior: 'smooth' }); }}>›</button>
         </div>
 
         {/* Conteúdo */}
