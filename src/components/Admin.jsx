@@ -420,7 +420,7 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
         {/* Abas */}
         <div className="admin-abas-wrapper">
           <button className="admin-abas-arrow admin-abas-arrow-left" onClick={() => { document.querySelector('.admin-abas').scrollBy({ left: -120, behavior: 'smooth' }); }}>‹</button>
-          <div className="admin-abas">
+          <div className="admin-abas" onWheel={(e) => { e.currentTarget.scrollBy({ left: e.deltaY > 0 ? 80 : -80 }); e.preventDefault(); }}>
             {[
               { id: 'dashboard',      label: '📊 Dashboard' },
               { id: 'aparencia',      label: '🎨 Aparência' },

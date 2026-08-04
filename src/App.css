@@ -1174,8 +1174,7 @@ button {
   border-radius: var(--radius);
   width: 100%;
   max-width: 820px;
-  height: calc(100vh - 32px);
-  max-height: calc(100vh - 32px);
+  max-height: 90vh;
   display: flex;
   flex-direction: column;
   box-shadow: 0 20px 60px rgba(0,0,0,0.3);
