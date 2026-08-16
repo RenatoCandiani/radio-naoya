@@ -47,6 +47,7 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
   const [patrocinadores, setPatrocinadores] = useState([]);
   const [locutores, setLocutores] = useState([]);
   const [planosComerciais, setPlanosComerciais] = useState([]);
+  const [banners, setBanners] = useState([]);
   const [radioInfo, setRadioInfo] = useState({});
   const [diaSel, setDiaSel] = useState(new Date().getDay());
 
@@ -121,6 +122,14 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
       .eq('radio_id', radio.id)
       .order('ordem');
     if (plComerciais) setPlanosComerciais(plComerciais);
+
+    // Carrega banners
+    const { data: bans } = await supabase
+      .from('banners')
+      .select('*')
+      .eq('radio_id', radio.id)
+      .order('ordem');
+    if (bans) setBanners(bans);
   }
 
   // ---- Login ----
@@ -230,6 +239,25 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
             preco: p.preco,
             itens: p.itens || [],
             destaque: !!p.destaque,
+            ordem: idx,
+          }))
+        );
+      }
+
+      // Salva banners — deleta e reinsere
+      await supabase.from('banners').delete().eq('radio_id', radioId);
+      if (banners.length > 0) {
+        await supabase.from('banners').insert(
+          banners.map((b, idx) => ({
+            radio_id: radioId,
+            titulo: b.titulo,
+            subtitulo: b.subtitulo || '',
+            cta: b.cta || '',
+            href: b.href || '#',
+            cor: b.cor || '#1565C0',
+            cor_texto: b.cor_texto || '#ffffff',
+            tag: b.tag || '',
+            imagem_url: b.imagem_url || '',
             ordem: idx,
           }))
         );
@@ -429,6 +457,7 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
               { id: 'locutores',      label: '🎙️ Locutores' },
               { id: 'patrocinadores', label: '✨ Patrocinadores' },
               { id: 'comercial',      label: '💼 Comercial' },
+              ...(plano === 'premium' ? [{ id: 'banners', label: '🖼️ Banners' }] : []),
             ].map((a) => (
               <button
                 key={a.id}
@@ -1106,6 +1135,85 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
                     rows={4}
                     placeholder={"Item 1\nItem 2\nItem 3"}
                   />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* ===== BANNERS (Premium) ===== */}
+          {aba === 'banners' && (
+            <div>
+              <div className="admin-secao-header">
+                <h3>Banners de Publicidade</h3>
+                <button className="admin-btn-add" onClick={() => setBanners([...banners, { titulo: '', subtitulo: '', cta: '', href: '#', cor: '#1565C0', cor_texto: '#ffffff', tag: 'PUBLICIDADE', imagem_url: '' }])}>+ Adicionar</button>
+              </div>
+              {banners.map((b, idx) => (
+                <div key={idx} className="admin-card">
+                  <div className="admin-card-header">
+                    <span className="admin-card-num">#{idx + 1}</span>
+                    <button className="admin-btn-remove" onClick={() => setBanners(banners.filter((_, i) => i !== idx))}>✕</button>
+                  </div>
+                  <div className="admin-prog-row">
+                    <div style={{ flex: 2 }}>
+                      <label className="admin-field-label">Título / Empresa</label>
+                      <input className="admin-input" value={b.titulo} onChange={(e) => { const arr = [...banners]; arr[idx] = { ...arr[idx], titulo: e.target.value }; setBanners(arr); }} placeholder="Nome do anunciante" />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <label className="admin-field-label">Tag</label>
+                      <input className="admin-input" value={b.tag} onChange={(e) => { const arr = [...banners]; arr[idx] = { ...arr[idx], tag: e.target.value }; setBanners(arr); }} placeholder="PUBLICIDADE" />
+                    </div>
+                  </div>
+                  <label className="admin-field-label">Subtítulo / Oferta</label>
+                  <input className="admin-input" value={b.subtitulo} onChange={(e) => { const arr = [...banners]; arr[idx] = { ...arr[idx], subtitulo: e.target.value }; setBanners(arr); }} placeholder="Descrição curta da promoção" />
+                  <div className="admin-prog-row">
+                    <div style={{ flex: 1 }}>
+                      <label className="admin-field-label">Botão CTA</label>
+                      <input className="admin-input" value={b.cta} onChange={(e) => { const arr = [...banners]; arr[idx] = { ...arr[idx], cta: e.target.value }; setBanners(arr); }} placeholder="Ex: Saiba mais" />
+                    </div>
+                    <div style={{ flex: 2 }}>
+                      <label className="admin-field-label">Link</label>
+                      <input className="admin-input" value={b.href} onChange={(e) => { const arr = [...banners]; arr[idx] = { ...arr[idx], href: e.target.value }; setBanners(arr); }} placeholder="https://..." />
+                    </div>
+                  </div>
+                  <div className="admin-prog-row">
+                    <div style={{ flex: 1 }}>
+                      <label className="admin-field-label">Cor de Fundo</label>
+                      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                        <input type="color" value={b.cor || '#1565C0'} onChange={(e) => { const arr = [...banners]; arr[idx] = { ...arr[idx], cor: e.target.value }; setBanners(arr); }} style={{ width: 32, height: 32, border: 'none', borderRadius: 6, cursor: 'pointer' }} />
+                        <input className="admin-input" value={b.cor} onChange={(e) => { const arr = [...banners]; arr[idx] = { ...arr[idx], cor: e.target.value }; setBanners(arr); }} style={{ flex: 1, marginBottom: 0 }} />
+                      </div>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <label className="admin-field-label">Cor do Texto</label>
+                      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                        <input type="color" value={b.cor_texto || '#ffffff'} onChange={(e) => { const arr = [...banners]; arr[idx] = { ...arr[idx], cor_texto: e.target.value }; setBanners(arr); }} style={{ width: 32, height: 32, border: 'none', borderRadius: 6, cursor: 'pointer' }} />
+                        <input className="admin-input" value={b.cor_texto} onChange={(e) => { const arr = [...banners]; arr[idx] = { ...arr[idx], cor_texto: e.target.value }; setBanners(arr); }} style={{ flex: 1, marginBottom: 0 }} />
+                      </div>
+                    </div>
+                  </div>
+                  <label className="admin-field-label">Imagem (opcional — substitui cor/texto)</label>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 10 }}>
+                    <input className="admin-input" value={b.imagem_url || ''} onChange={(e) => { const arr = [...banners]; arr[idx] = { ...arr[idx], imagem_url: e.target.value }; setBanners(arr); }} placeholder="URL da imagem ou faça upload →" style={{ flex: 1, marginBottom: 0 }} />
+                    <label className="admin-btn-upload">
+                      📁
+                      <input type="file" accept="image/*" hidden onChange={async (e) => { const file = e.target.files[0]; if (!file) return; const url = await uploadImage(file, 'banners'); if (url) { const arr = [...banners]; arr[idx] = { ...arr[idx], imagem_url: url }; setBanners(arr); } }} />
+                    </label>
+                  </div>
+                  {/* Preview */}
+                  <div style={{ borderRadius: 8, overflow: 'hidden', marginTop: 8 }}>
+                    {b.imagem_url ? (
+                      <img src={b.imagem_url} alt="preview" style={{ width: '100%', height: 60, objectFit: 'cover' }} />
+                    ) : b.titulo && (
+                      <div style={{ background: b.cor, color: b.cor_texto, padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                          {b.tag && <div style={{ fontSize: '0.6rem', opacity: 0.7, textTransform: 'uppercase', letterSpacing: 1 }}>{b.tag}</div>}
+                          <strong style={{ fontSize: '0.85rem' }}>{b.titulo}</strong>
+                          {b.subtitulo && <div style={{ fontSize: '0.72rem', opacity: 0.85 }}>{b.subtitulo}</div>}
+                        </div>
+                        {b.cta && <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: 14, padding: '4px 10px', fontSize: '0.72rem', fontWeight: 700 }}>{b.cta} →</div>}
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
