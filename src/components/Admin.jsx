@@ -455,6 +455,7 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
               { id: 'noticias',       label: '📰 Notícias' },
               { id: 'programacao',    label: '🕐 Programação' },
               { id: 'locutores',      label: '🎙️ Locutores' },
+              { id: 'historia',       label: '📖 História' },
               { id: 'patrocinadores', label: '✨ Patrocinadores' },
               { id: 'comercial',      label: '💼 Comercial' },
               ...(plano === 'premium' ? [{ id: 'banners', label: '🖼️ Banners' }] : []),
@@ -626,14 +627,32 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
                     />
                   </div>
                 </div>
-                <label className="admin-field-label">História</label>
+              </div>
+            </div>
+          )}
+
+          {/* ===== HISTÓRIA ===== */}
+          {aba === 'historia' && (
+            <div>
+              <div className="admin-secao-header">
+                <h3>Nossa História</h3>
+              </div>
+              <div className="admin-card">
+                <p style={{ fontSize: '0.85rem', color: '#888', marginBottom: 14, lineHeight: 1.5 }}>
+                  Este texto aparece na aba "Nossa História" do seu site. Conte quando a rádio surgiu,
+                  a região que atende e o que ela representa para os ouvintes.
+                </p>
+                <label className="admin-field-label">Texto da história</label>
                 <textarea
                   className="admin-input admin-textarea"
                   value={radioInfo.historia || ''}
                   onChange={(e) => setRadioInfo({ ...radioInfo, historia: e.target.value })}
-                  rows={4}
-                  placeholder="Conte a história da sua rádio..."
+                  rows={12}
+                  placeholder="Ex: A Rádio Exemplo FM está no ar desde 1985, levando informação e cultura para toda a região..."
                 />
+                <p style={{ fontSize: '0.78rem', color: '#aaa', marginTop: 4 }}>
+                  {(radioInfo.historia || '').length} caracteres
+                </p>
               </div>
             </div>
           )}
