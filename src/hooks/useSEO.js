@@ -35,7 +35,30 @@ export function useSEO(radioData) {
 
     // Apple title
     setMeta('apple-mobile-web-app-title', nome);
+
+    // Favicon da aba do navegador — usa a logo da rádio
+    if (logo) {
+      setFavicon(logo);
+    }
   }, [radioData]);
+}
+
+// Troca o ícone que aparece na aba do navegador
+function setFavicon(url) {
+  // Remove ícones antigos pra evitar o navegador manter o anterior
+  document
+    .querySelectorAll('link[rel="icon"], link[rel="shortcut icon"], link[rel="apple-touch-icon"]')
+    .forEach((el) => el.remove());
+
+  const icon = document.createElement('link');
+  icon.rel = 'icon';
+  icon.href = url;
+  document.head.appendChild(icon);
+
+  const apple = document.createElement('link');
+  apple.rel = 'apple-touch-icon';
+  apple.href = url;
+  document.head.appendChild(apple);
 }
 
 function setMeta(nameOrProperty, content, attr = 'name') {

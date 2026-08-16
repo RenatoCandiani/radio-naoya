@@ -160,6 +160,8 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
         whatsapp: radioInfo.whatsapp,
         historia: radioInfo.historia,
         logo_url: radioInfo.logo_url,
+        metadados_url: radioInfo.metadados_url,
+        streams: (radioInfo.streams || []).filter((s) => s.url),
         tema: radioInfo.tema,
         updated_at: new Date().toISOString(),
       }).eq('id', radioId);
@@ -451,6 +453,7 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
           <div className="admin-abas">
             {[
               { id: 'dashboard',      label: '📊 Dashboard' },
+              { id: 'transmissao',    label: '📡 Transmissão' },
               { id: 'aparencia',      label: '🎨 Aparência' },
               { id: 'noticias',       label: '📰 Notícias' },
               { id: 'programacao',    label: '🕐 Programação' },
@@ -617,16 +620,105 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
                       placeholder="5511999999999"
                     />
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <label className="admin-field-label">URL dos Metadados</label>
+                  <div style={{ flex: 1 }} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ===== TRANSMISSÃO ===== */}
+          {aba === 'transmissao' && (
+            <div>
+              <div className="admin-secao-header">
+                <h3>Transmissão</h3>
+                <button
+                  className="admin-btn-add"
+                  onClick={() => setRadioInfo({
+                    ...radioInfo,
+                    streams: [...(radioInfo.streams || []), { label: '', url: '' }],
+                  })}
+                >
+                  + Adicionar stream
+                </button>
+              </div>
+
+              <div className="admin-card">
+                <p style={{ fontSize: '0.85rem', color: '#888', marginBottom: 14, lineHeight: 1.5 }}>
+                  Cole aqui o endereço do seu servidor de streaming. É o mesmo link que você usa
+                  hoje pra transmitir (Icecast, Shoutcast, BRLogic e afins). Se tiver mais de um
+                  endereço, adicione todos — o player tenta o primeiro e cai pros seguintes se falhar.
+                </p>
+
+                {(!radioInfo.streams || radioInfo.streams.length === 0) && (
+                  <div style={{ textAlign: 'center', padding: '24px 16px', color: '#c62828', background: '#ffebee', borderRadius: 8, marginBottom: 14 }}>
+                    <strong style={{ display: 'block', marginBottom: 4 }}>⚠️ Nenhum stream configurado</strong>
+                    <span style={{ fontSize: '0.85rem' }}>Sem isso o player do site não toca. Clique em "+ Adicionar stream".</span>
+                  </div>
+                )}
+
+                {(radioInfo.streams || []).map((s, idx) => (
+                  <div key={idx} className="admin-card" style={{ background: '#fff' }}>
+                    <div className="admin-card-header">
+                      <span className="admin-card-num">#{idx + 1}</span>
+                      {idx === 0 && (
+                        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#2e7d32', background: '#e8f5e9', padding: '2px 8px', borderRadius: 10 }}>
+                          PRINCIPAL
+                        </span>
+                      )}
+                      <button
+                        className="admin-btn-remove"
+                        onClick={() => setRadioInfo({
+                          ...radioInfo,
+                          streams: (radioInfo.streams || []).filter((_, i) => i !== idx),
+                        })}
+                      >✕</button>
+                    </div>
+                    <label className="admin-field-label">Nome da transmissão</label>
                     <input
                       className="admin-input"
-                      value={radioInfo.metadados_url || ''}
-                      onChange={(e) => setRadioInfo({ ...radioInfo, metadados_url: e.target.value })}
-                      placeholder="URL da API de streaming"
+                      value={s.label || ''}
+                      onChange={(e) => {
+                        const arr = [...(radioInfo.streams || [])];
+                        arr[idx] = { ...arr[idx], label: e.target.value };
+                        setRadioInfo({ ...radioInfo, streams: arr });
+                      }}
+                      placeholder="Ex: Rádio Exemplo FM (Ao Vivo)"
                     />
+                    <label className="admin-field-label">Endereço do stream</label>
+                    <input
+                      className="admin-input"
+                      value={s.url || ''}
+                      onChange={(e) => {
+                        const arr = [...(radioInfo.streams || [])];
+                        arr[idx] = { ...arr[idx], url: e.target.value };
+                        setRadioInfo({ ...radioInfo, streams: arr });
+                      }}
+                      placeholder="https://servidor.com.br:8000/live"
+                    />
+                    {s.url && !s.url.startsWith('https://') && !s.url.startsWith('/') && (
+                      <p style={{ fontSize: '0.78rem', color: '#e65100', marginTop: -4 }}>
+                        ⚠️ Endereços que não são <strong>https://</strong> podem ser bloqueados pelo navegador.
+                        Peça ao seu provedor de streaming o link seguro (https).
+                      </p>
+                    )}
                   </div>
-                </div>
+                ))}
+              </div>
+
+              <div className="admin-card">
+                <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: 8 }}>🎵 Música tocando agora (opcional)</h4>
+                <p style={{ fontSize: '0.85rem', color: '#888', marginBottom: 12, lineHeight: 1.5 }}>
+                  Alguns provedores oferecem um link que informa qual música está no ar. Se você tiver,
+                  cole aqui e o site mostra o nome da música em tempo real. Sem isso, o site mostra
+                  o programa da grade de programação.
+                </p>
+                <label className="admin-field-label">URL dos metadados</label>
+                <input
+                  className="admin-input"
+                  value={radioInfo.metadados_url || ''}
+                  onChange={(e) => setRadioInfo({ ...radioInfo, metadados_url: e.target.value })}
+                  placeholder="https://..."
+                />
               </div>
             </div>
           )}
