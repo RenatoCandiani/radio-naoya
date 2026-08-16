@@ -2,9 +2,17 @@ import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+// A service_role key é obrigatória: ela ignora o RLS e é a única
+// forma de atualizar o plano da rádio. Sem ela o cliente pagaria
+// e não receberia o plano — melhor falhar alto que falhar calado.
+if (!process.env.SUPABASE_SERVICE_KEY) {
+  throw new Error('SUPABASE_SERVICE_KEY não configurada — webhook não pode atualizar planos.');
+}
+
 const supabase = createClient(
   process.env.SUPABASE_URL || 'https://ygifgplxganolpgolzii.supabase.co',
-  process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY
+  process.env.SUPABASE_SERVICE_KEY
 );
 
 // Desabilita body parser pra receber raw body do Stripe
