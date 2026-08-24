@@ -26,9 +26,23 @@
 **Tela:** Google, busca por `rádio fm site` — abre um site de rádio feio de verdade.
 
 **Fala/legenda:**
-> "É assim que a maioria dos sites de rádio ainda é hoje."
+> "O site da sua rádio se parece com isso?"
 
 *Não precisa narrar em voz. Legenda na tela funciona igual e é mais fácil.*
+
+**Por que uma pergunta e não uma afirmação:** dizer "a maioria dos sites de rádio é
+assim" é um dado que você não tem. Se alguém questionar, você não tem resposta.
+A pergunta não afirma nada — quem assiste responde na própria cabeça, e quem se
+identifica já entra no vídeo interessado.
+
+Alternativas, se a pergunta não te agradar:
+- `"Se o site da sua rádio é parecido com esse, esse vídeo é pra você."`
+- `"Foi vendo sites assim que eu resolvi criar isso."` (pessoal, e é verdade)
+- Sem legenda nenhuma: 3 segundos no site feio e corta pro bonito. O contraste fala sozinho.
+
+**Não faça:** mostrar o nome da rádio do site feio. Você pode estar mostrando o site
+de um cliente em potencial — e ninguém compra de quem expôs o trabalho dele.
+Dá um zoom que corte a logo, ou escolhe um site de fora da sua região.
 
 ---
 
