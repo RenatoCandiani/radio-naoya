@@ -22,9 +22,10 @@ CREATE POLICY "Dono edita planos comerciais" ON planos_comerciais
   FOR ALL USING (radio_id IN (SELECT id FROM radios WHERE owner_id = auth.uid()))
   WITH CHECK (radio_id IN (SELECT id FROM radios WHERE owner_id = auth.uid()));
 
--- Permite insert sem auth (pra onboarding)
-CREATE POLICY "Qualquer um cria plano comercial" ON planos_comerciais
-  FOR INSERT WITH CHECK (true);
+-- (Removida em 27/09/2026: a policy "Qualquer um cria plano comercial"
+--  deixava visitante sem login criar plano em qualquer rádio. O cadastro
+--  não grava planos comerciais, então ela não era necessária.
+--  Ver supabase-fix-comercial.sql.)
 
 -- Seed da Marajá
 INSERT INTO planos_comerciais (radio_id, nome, descricao, preco, itens, destaque, ordem) VALUES
