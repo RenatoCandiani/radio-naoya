@@ -2,6 +2,10 @@ import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { PLANOS } from '../lib/planos';
 
+// Contato do suporte (o próprio desenvolvedor)
+const SUPORTE_WHATSAPP = '5511960758318';
+const SUPORTE_WHATSAPP_VISIVEL = '(11) 96075-8318';
+
 const FEATURES_LISTA = [
   { feature: 'Site completo com player', free: true, basic: true, premium: true },
   { feature: 'Programação e locutores', free: true, basic: true, premium: true },
@@ -102,7 +106,7 @@ export function LandingPage() {
       )}
 
       {/* Features */}
-      <section className="landing-section">
+      <section className="landing-section" id="recursos">
         <h2>Tudo que sua rádio precisa</h2>
         <div className="landing-features-grid">
           <div className="landing-feature-card">
@@ -139,7 +143,7 @@ export function LandingPage() {
       </section>
 
       {/* Como funciona */}
-      <section className="landing-section">
+      <section className="landing-section" id="como-funciona">
         <h2>Como funciona</h2>
         <div className="landing-steps">
           <div className="landing-step">
@@ -266,7 +270,7 @@ export function LandingPage() {
       </section>
 
       {/* FAQ */}
-      <section className="landing-section">
+      <section className="landing-section" id="faq">
         <h2>Perguntas Frequentes</h2>
         <div className="landing-faq">
           <details className="landing-faq-item">
@@ -294,8 +298,64 @@ export function LandingPage() {
 
       {/* Footer */}
       <footer className="landing-footer">
-        <p>📻 Rádio Naoya — Sites modernos para rádios</p>
-        <p className="landing-footer-sub">Feito com ❤️ para rádios do Brasil</p>
+        <div className="landing-footer-grid">
+          <div className="landing-footer-marca">
+            <p className="landing-footer-logo">📻 Rádio Naoya</p>
+            <p className="landing-footer-desc">
+              Sites modernos para rádios. Player ao vivo, programação, locutores
+              e notícias, editados por você mesmo, sem depender de programador.
+            </p>
+            <p className="landing-footer-mantido">
+              Feito por um desenvolvedor independente, não por uma empresa.
+              Você fala direto com quem programa.
+            </p>
+          </div>
+
+          <div className="landing-footer-col">
+            <h4>O serviço</h4>
+            <a href="#recursos">Recursos</a>
+            <a href="#como-funciona">Como funciona</a>
+            <a href="#planos">Planos e preços</a>
+            <a href="#faq">Perguntas frequentes</a>
+          </div>
+
+          <div className="landing-footer-col">
+            <h4>Começar</h4>
+            <a href="#cadastro">Criar site grátis</a>
+            <button type="button" className="landing-footer-link" onClick={() => setShowDemo(true)}>
+              Ver demo ao vivo
+            </button>
+            <a href="/?radio=bemtevi">Site de exemplo</a>
+          </div>
+
+          <div className="landing-footer-col">
+            <h4>Contato e ajuda</h4>
+            <a href={`https://wa.me/${SUPORTE_WHATSAPP}`} target="_blank" rel="noreferrer">
+              WhatsApp {SUPORTE_WHATSAPP_VISIVEL}
+            </a>
+            <span className="landing-footer-nota">
+              Resposta assim que possível. Não é atendimento 24h.
+            </span>
+          </div>
+
+          <div className="landing-footer-col">
+            <h4>Legal</h4>
+            <a href="/?pagina=termos">Termos de Uso</a>
+            <a href="/?pagina=privacidade">Política de Privacidade</a>
+            <span className="landing-footer-nota">
+              Cancele quando quiser, sem multa. 7 dias para desistir e receber
+              de volta.
+            </span>
+          </div>
+        </div>
+
+        <div className="landing-footer-base">
+          <p>© {new Date().getFullYear()} Rádio Naoya · Feito no Brasil, para rádios do Brasil</p>
+          <p className="landing-footer-sub">
+            O Rádio Naoya hospeda o site da sua rádio. Não transmite o áudio: a
+            transmissão continua sendo do servidor da emissora.
+          </p>
+        </div>
       </footer>
     </div>
   );

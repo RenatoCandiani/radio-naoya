@@ -17,6 +17,7 @@ import { Sidebar } from './components/Sidebar';
 import { StickyPlayer } from './components/StickyPlayer';
 import { MarcaDagua } from './components/MarcaDagua';
 import { LandingPage } from './components/LandingPage';
+import { Termos, Privacidade } from './components/PaginaLegal';
 import { TabHome } from './components/TabHome';
 import { TabNoticia } from './components/TabNoticia';
 import { TabProgramacao } from './components/TabProgramacao';
@@ -44,6 +45,13 @@ function App() {
 
   // Multi-tenant: carrega config da rádio pela API
   const { config: radioConfig, loading: configLoading, slug } = useRadioConfig();
+
+  // Termos de Uso e Política de Privacidade (links do rodapé)
+  const pagina = params.get('pagina');
+  if (pagina === 'termos' || pagina === 'privacidade') {
+    const voltar = () => { window.location.href = '/'; };
+    return pagina === 'termos' ? <Termos onVoltar={voltar} /> : <Privacidade onVoltar={voltar} />;
+  }
 
   // Se é a landing page, renderiza ela
   if (isLanding) {
