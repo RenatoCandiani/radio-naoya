@@ -80,7 +80,7 @@ function App() {
   useTheme(radioData.tema);
 
   // SEO dinâmico
-  useSEO(radioData);
+  useSEO(radioData, slug);
 
   // PWA dinâmica
   usePWA(radioData);

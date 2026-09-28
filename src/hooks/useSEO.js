@@ -4,16 +4,18 @@ import { useEffect } from 'react';
  * Atualiza title, meta description e Open Graph dinamicamente
  * baseado nos dados da rádio.
  */
-export function useSEO(radioData) {
+export function useSEO(radioData, slug) {
   useEffect(() => {
     if (!radioData || !radioData.nome) return;
 
     const nome = radioData.nome;
     const frequencia = radioData.frequencia || '';
-    const title = `${nome} ${frequencia} — Ouça Agora`.trim();
+    // "ao vivo" é o que as pessoas realmente digitam ("rádio tal ao vivo"),
+    // então entra no título. "Ouça Agora" não é termo de busca.
+    const title = `${nome} ${frequencia} ao vivo — Ouça online`.replace(/\s+/g, ' ').trim();
     const description = radioData.historia
       ? radioData.historia.substring(0, 160)
-      : `Ouça ${nome} ao vivo. Programação, locutores e notícias.`;
+      : `Ouça a ${nome} ${frequencia} ao vivo pela internet. Programação, locutores e notícias da região.`.replace(/\s+/g, ' ');
     const logo = radioData.logo || '';
 
     // Title
@@ -36,11 +38,19 @@ export function useSEO(radioData) {
     // Apple title
     setMeta('apple-mobile-web-app-title', nome);
 
+    // Endereço canônico: sem isso, o Google vê a mesma página em
+    // /?radio=x, /?radio=x&noticia=y etc. e divide a força entre elas.
+    if (slug) {
+      setCanonical(slug.startsWith('__domain__:')
+        ? `https://${slug.replace('__domain__:', '')}/`          // domínio próprio da rádio
+        : `https://www.radionaoya.com.br/?radio=${slug}`);
+    }
+
     // Favicon da aba do navegador — usa a logo da rádio
     if (logo) {
       setFavicon(logo);
     }
-  }, [radioData]);
+  }, [radioData, slug]);
 }
 
 // Troca o ícone que aparece na aba do navegador
@@ -59,6 +69,16 @@ function setFavicon(url) {
   apple.rel = 'apple-touch-icon';
   apple.href = url;
   document.head.appendChild(apple);
+}
+
+function setCanonical(url) {
+  let el = document.querySelector('link[rel="canonical"]');
+  if (!el) {
+    el = document.createElement('link');
+    el.rel = 'canonical';
+    document.head.appendChild(el);
+  }
+  el.href = url;
 }
 
 function setMeta(nameOrProperty, content, attr = 'name') {
