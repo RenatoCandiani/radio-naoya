@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { STREAMS as STREAMS_FALLBACK, PATROCINADORES as PAT_FALLBACK, RADIO_CONFIG } from '../data/config';
+import { STREAMS as STREAMS_FALLBACK, PATROCINADORES as PAT_FALLBACK } from '../data/config';
 
-export function Sidebar({ isPlaying, togglePlay, nowPlaying, selectedStream, onStreamChange, patrocinadores: patrocinadoreProp, streams: streamsProp }) {
+export function Sidebar({ isPlaying, togglePlay, nowPlaying, selectedStream, onStreamChange, patrocinadores: patrocinadoreProp, streams: streamsProp, metadadosUrl }) {
   const patrocinadores = (patrocinadoreProp && patrocinadoreProp.length > 0) ? patrocinadoreProp : [];
   const streams = (streamsProp && streamsProp.length > 0) ? streamsProp : [];
   const [patrocinadorIdx, setPatrocinadorIdx] = useState(0);
@@ -15,10 +15,15 @@ export function Sidebar({ isPlaying, togglePlay, nowPlaying, selectedStream, onS
     return () => clearInterval(timer);
   }, [patrocinadores.length]);
 
-  // Fetch listener count
+  // Contador de ouvintes: usa os metadados DA PRÓPRIA rádio. Antes lia
+  // sempre os da Marajá e mostrava o número dela em qualquer rádio.
   useEffect(() => {
+    if (!metadadosUrl) {
+      setListeners(null);
+      return;
+    }
     const fetchListeners = () => {
-      fetch(RADIO_CONFIG.metadadosUrl)
+      fetch(metadadosUrl)
         .then((res) => res.json())
         .then((data) => {
           if (data && typeof data.listeners !== 'undefined') {
@@ -30,7 +35,7 @@ export function Sidebar({ isPlaying, togglePlay, nowPlaying, selectedStream, onS
     fetchListeners();
     const interval = setInterval(fetchListeners, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [metadadosUrl]);
 
   return (
     <aside className="sidebar">

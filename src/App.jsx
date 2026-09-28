@@ -80,7 +80,11 @@ function App() {
   // Analytics
   useAnalytics(slug);
 
-  const streams = radioData.streams && radioData.streams.length > 0 ? radioData.streams : STREAMS;
+  // Enquanto a config não chega, lista vazia: antes caía nos streams da
+  // Marajá e o navegador já abria o áudio dela em qualquer rádio.
+  const streams = radioData.streams && radioData.streams.length > 0
+    ? radioData.streams
+    : (radioConfig ? STREAMS : []);
 
   const [activeTab, setActiveTab]           = useState('home');
   const [isPlaying, setIsPlaying]           = useState(false);
@@ -129,6 +133,16 @@ function App() {
 
   // Detecta template (query param ou config da rádio)
   const template = params.get('template') || radioData.template || 'classico';
+
+  // A lista de streams só fica certa depois que a config carrega. Sem isto,
+  // o selecionado continuava o da lista provisória e o Play tocava a rádio
+  // errada (a Marajá) em qualquer outra rádio.
+  const streamsKey = streams.map((s) => s.url).join('|');
+  useEffect(() => {
+    if (!streams.some((s) => s.url === selectedStream)) {
+      setSelectedStream(streams[0]?.url || '');
+    }
+  }, [streamsKey]);
 
   // Atualiza src quando stream muda
   useEffect(() => {
@@ -253,6 +267,7 @@ function App() {
           onStreamChange={(e) => setSelectedStream(e.target.value)}
           patrocinadores={adminData.patrocinadores}
           streams={streams}
+          metadadosUrl={radioData.metadadosUrl}
         />
         <main className="main-content" role="main">
           {activeTab === 'home'        && <TabHome noticias={adminData.noticias} banner={adminData.banner} />}
