@@ -3,7 +3,6 @@ import './App.css';
 import './landing.css';
 
 import {
-  RADIO_CONFIG, STREAMS,
   NOTICIAS, PROGRAMACAO, PATROCINADORES, BANNERS_PREMIUM,
 } from './data/config';
 import { useNowPlaying } from './hooks/useNowPlaying';
@@ -80,11 +79,10 @@ function App() {
   // Analytics
   useAnalytics(slug);
 
-  // Enquanto a config não chega, lista vazia: antes caía nos streams da
-  // Marajá e o navegador já abria o áudio dela em qualquer rádio.
-  const streams = radioData.streams && radioData.streams.length > 0
-    ? radioData.streams
-    : (radioConfig ? STREAMS : []);
+  // Só os streams DESTA rádio. Antes, rádio sem stream cadastrado caía na
+  // lista da Marajá: o seletor mostrava a emissora errada e o Play tocava ela.
+  // Sem stream, a lateral mostra "configure seu stream no painel".
+  const streams = radioData.streams && radioData.streams.length > 0 ? radioData.streams : [];
 
   const [activeTab, setActiveTab]           = useState('home');
   const [isPlaying, setIsPlaying]           = useState(false);
