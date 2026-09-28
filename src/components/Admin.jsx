@@ -195,6 +195,9 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
             resumo: n.resumo || '',
             img_url: n.img_url || n.img || '',
             destaque: !!n.destaque,
+            conteudo: n.conteudo || '',
+            autor: n.autor || '',
+            categoria: n.categoria || '',
           }))
         );
       }
@@ -301,7 +304,10 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
     arr[idx] = { ...arr[idx], [campo]: valor };
     setNoticias(arr);
   };
-  const addNoticia = () => setNoticias([...noticias, { titulo: '', resumo: '', img_url: '', destaque: false }]);
+  const addNoticia = () => setNoticias([...noticias, {
+    titulo: '', resumo: '', img_url: '', destaque: false,
+    conteudo: '', autor: '', categoria: '',
+  }]);
   const removeNoticia = (idx) => setNoticias(noticias.filter((_, i) => i !== idx));
 
   // ---- Programação helpers ----
@@ -949,13 +955,43 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
                     onChange={(e) => updateNoticia(idx, 'titulo', e.target.value)}
                     placeholder="Título da notícia"
                   />
-                  <label className="admin-field-label">Resumo</label>
+                  <div className="admin-prog-row">
+                    <div style={{ flex: 1 }}>
+                      <label className="admin-field-label">Editoria</label>
+                      <input
+                        className="admin-input"
+                        value={n.categoria || ''}
+                        onChange={(e) => updateNoticia(idx, 'categoria', e.target.value)}
+                        placeholder="Cidade, Esporte, Política..."
+                      />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <label className="admin-field-label">Autor</label>
+                      <input
+                        className="admin-input"
+                        value={n.autor || ''}
+                        onChange={(e) => updateNoticia(idx, 'autor', e.target.value)}
+                        placeholder="Quem escreveu"
+                      />
+                    </div>
+                  </div>
+                  <label className="admin-field-label">Resumo (a chamada que aparece na home)</label>
                   <textarea
                     className="admin-input admin-textarea"
                     value={n.resumo}
                     onChange={(e) => updateNoticia(idx, 'resumo', e.target.value)}
-                    placeholder="Resumo da notícia"
+                    placeholder="Uma ou duas frases sobre a notícia"
                     rows={2}
+                  />
+                  <label className="admin-field-label">
+                    Texto da notícia (deixe uma linha em branco entre os parágrafos)
+                  </label>
+                  <textarea
+                    className="admin-input admin-textarea"
+                    value={n.conteudo || ''}
+                    onChange={(e) => updateNoticia(idx, 'conteudo', e.target.value)}
+                    placeholder={'A matéria completa, que o ouvinte lê ao clicar na manchete.\n\nCada parágrafo separado por uma linha em branco.'}
+                    rows={8}
                   />
                   <label className="admin-field-label">Imagem</label>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 10 }}>

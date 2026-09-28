@@ -18,6 +18,7 @@ import { StickyPlayer } from './components/StickyPlayer';
 import { MarcaDagua } from './components/MarcaDagua';
 import { LandingPage } from './components/LandingPage';
 import { TabHome } from './components/TabHome';
+import { TabNoticia } from './components/TabNoticia';
 import { TabProgramacao } from './components/TabProgramacao';
 import { TabHistoria } from './components/TabHistoria';
 import { TabContatos } from './components/TabContatos';
@@ -90,6 +91,8 @@ function App() {
   const [volume, setVolume]                 = useState(0.8);
   const [selectedStream, setSelectedStream] = useState(streams[0]?.url || '');
   const [showAdmin, setShowAdmin]           = useState(false);
+  // Notícia aberta. Fica no endereço (?noticia=ID) pra poder compartilhar.
+  const [noticiaId, setNoticiaId]           = useState(() => params.get('noticia'));
   const [darkMode, setDarkMode]             = useState(() => {
     return localStorage.getItem('darkMode') === 'true';
   });
@@ -173,6 +176,40 @@ function App() {
     if (audioRef.current) audioRef.current.volume = val;
   };
 
+  // ---- Notícia aberta ----
+  const noticiasLista = adminData.noticias || [];
+  const noticiaAberta = noticiaId
+    ? noticiasLista.find((n) => String(n.id) === String(noticiaId))
+    : null;
+
+  const trocaEndereco = (id) => {
+    const p = new URLSearchParams(window.location.search);
+    if (id) p.set('noticia', id); else p.delete('noticia');
+    const busca = p.toString();
+    window.history.pushState({}, '', `${window.location.pathname}${busca ? '?' + busca : ''}`);
+  };
+
+  const abrirNoticia = (n) => {
+    setNoticiaId(n.id);
+    setActiveTab('home');
+    trocaEndereco(n.id);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const fecharNoticia = () => {
+    setNoticiaId(null);
+    trocaEndereco(null);
+  };
+
+  // Botão voltar do navegador fecha (ou reabre) a notícia
+  useEffect(() => {
+    const aoVoltar = () => {
+      setNoticiaId(new URLSearchParams(window.location.search).get('noticia'));
+    };
+    window.addEventListener('popstate', aoVoltar);
+    return () => window.removeEventListener('popstate', aoVoltar);
+  }, []);
+
   const whatsappHref = `https://wa.me/${radioData.whatsapp}?text=Ol%C3%A1%2C%20quero%20pedir%20uma%20m%C3%BAsica!`;
 
   // Tela de loading enquanto Supabase carrega
@@ -237,8 +274,8 @@ function App() {
         {TABS.map((tab) => (
           <button
             key={tab.id}
-            className={`nav-btn${activeTab === tab.id ? ' ativo' : ''}`}
-            onClick={() => setActiveTab(tab.id)}
+            className={`nav-btn${activeTab === tab.id && !noticiaAberta ? ' ativo' : ''}`}
+            onClick={() => { fecharNoticia(); setActiveTab(tab.id); }}
             aria-current={activeTab === tab.id ? 'page' : undefined}
           >
             {tab.label}
@@ -268,12 +305,24 @@ function App() {
           metadadosUrl={radioData.metadadosUrl}
         />
         <main className="main-content" role="main">
-          {activeTab === 'home'        && <TabHome noticias={adminData.noticias} banner={adminData.banner} />}
+          {noticiaAberta ? (
+            <TabNoticia
+              noticia={noticiaAberta}
+              noticias={noticiasLista}
+              onVoltar={fecharNoticia}
+              onAbrir={abrirNoticia}
+              nomeRadio={radioData.nome}
+            />
+          ) : (
+            <>
+          {activeTab === 'home'        && <TabHome noticias={adminData.noticias} banner={adminData.banner} onAbrirNoticia={abrirNoticia} />}
           {activeTab === 'programacao' && <TabProgramacao programacao={adminData.programacao} />}
           {activeTab === 'locutores'   && <TabLocutores locutores={radioData.locutores} />}
           {activeTab === 'historia'    && <TabHistoria radioData={radioData} />}
           {activeTab === 'comercial'   && <TabComercial whatsapp={radioData.whatsapp} nome={radioData.nome} planosComerciais={radioData.planosComerciais} />}
           {activeTab === 'contatos'    && <TabContatos whatsappHref={whatsappHref} whatsapp={radioData.whatsapp} />}
+            </>
+          )}
         </main>
       </div>
 

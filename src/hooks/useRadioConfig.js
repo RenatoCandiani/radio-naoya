@@ -134,6 +134,12 @@ export function useRadioConfig() {
           resumo: n.resumo,
           img: n.img_url,
           destaque: n.destaque,
+          // Campos da página da notícia. Podem não existir em bancos
+          // antigos (migração supabase-noticias-completas.sql).
+          conteudo: n.conteudo || '',
+          autor: n.autor || '',
+          categoria: n.categoria || '',
+          created_at: n.created_at,
         }));
 
         // Formata patrocinadores

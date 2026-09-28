@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NOTICIAS, BANNERS_PREMIUM } from '../data/config';
 
-export function TabHome({ noticias = [], banner = [] }) {
+export function TabHome({ noticias = [], banner = [], onAbrirNoticia }) {
   const banners = (Array.isArray(banner) && banner.length > 0) ? banner : null;
   const [bannerIdx, setBannerIdx] = useState(0);
 
@@ -75,18 +75,25 @@ export function TabHome({ noticias = [], banner = [] }) {
         </div>
       )}
 
-      {/* Notícia Destaque (Hero) */}
+      {/* Notícia Destaque (Hero) — clicável, abre a notícia */}
       {noticias.filter((n) => n.destaque).map((noticia) => (
         <div
           key={noticia.id}
-          className="hero-news"
+          className={`hero-news${onAbrirNoticia ? ' hero-news--clicavel' : ''}`}
           style={{ backgroundImage: `url('${noticia.img}')` }}
-          role="article"
+          role={onAbrirNoticia ? 'button' : 'article'}
+          tabIndex={onAbrirNoticia ? 0 : undefined}
+          onClick={onAbrirNoticia ? () => onAbrirNoticia(noticia) : undefined}
+          onKeyDown={onAbrirNoticia ? (e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onAbrirNoticia(noticia); }
+          } : undefined}
+          aria-label={onAbrirNoticia ? `Ler: ${noticia.titulo}` : undefined}
         >
           <div className="hero-overlay">
             <span className="hero-tag">DESTAQUE</span>
             <h2 className="hero-titulo">{noticia.titulo}</h2>
             <p className="hero-resumo">{noticia.resumo}</p>
+            {onAbrirNoticia && <span className="hero-leia">Leia a notícia →</span>}
           </div>
         </div>
       ))}
@@ -98,15 +105,24 @@ export function TabHome({ noticias = [], banner = [] }) {
             <h3>Últimas Notícias</h3>
           </div>
           <div className="news-grid">
-            {noticias.filter((n) => !n.destaque).map((noticia) => (
-              <article key={noticia.id} className="news-card">
-                <img src={noticia.img} alt={noticia.titulo} loading="lazy" />
-                <div className="news-card-body">
-                  <h4>{noticia.titulo}</h4>
-                  <p>{noticia.resumo}</p>
-                </div>
-              </article>
-            ))}
+            {noticias.filter((n) => !n.destaque).map((noticia) => {
+              const Tag = onAbrirNoticia ? 'button' : 'article';
+              return (
+                <Tag
+                  key={noticia.id}
+                  className={`news-card${onAbrirNoticia ? ' news-card--clicavel' : ''}`}
+                  onClick={onAbrirNoticia ? () => onAbrirNoticia(noticia) : undefined}
+                  aria-label={onAbrirNoticia ? `Ler: ${noticia.titulo}` : undefined}
+                >
+                  <img src={noticia.img} alt={noticia.titulo} loading="lazy" />
+                  <div className="news-card-body">
+                    {noticia.categoria && <span className="news-card-cat">{noticia.categoria}</span>}
+                    <h4>{noticia.titulo}</h4>
+                    <p>{noticia.resumo}</p>
+                  </div>
+                </Tag>
+              );
+            })}
           </div>
         </>
       )}
