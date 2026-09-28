@@ -605,13 +605,20 @@
   margin: 0 0 4px;
 }
 
+/* Sublinhado discreto já em repouso: sem ele, o link parece texto comum
+   e ninguém percebe que dá pra clicar. */
 .landing-footer-col a,
 .landing-footer-link {
   font-size: 0.88rem;
   color: inherit;
-  text-decoration: none;
-  opacity: 0.88;
-  transition: opacity 0.2s;
+  cursor: pointer;
+  opacity: 0.9;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  text-decoration-color: rgba(255, 255, 255, 0.35);
+  transition: opacity 0.2s, text-decoration-color 0.2s;
+  width: fit-content;
 }
 
 .landing-footer-link {
@@ -626,8 +633,12 @@
 .landing-footer-col a:hover,
 .landing-footer-link:hover {
   opacity: 1;
-  text-decoration: underline;
+  text-decoration-color: currentColor;
 }
+
+/* O clique numa âncora não pode deixar o título colado no topo da tela */
+#recursos, #como-funciona, #planos, #cadastro, #faq { scroll-margin-top: 24px; }
+html { scroll-behavior: smooth; }
 
 .landing-footer-nota {
   font-size: 0.75rem;
