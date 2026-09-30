@@ -5,6 +5,7 @@ import './landing.css';
 import {
   NOTICIAS, PROGRAMACAO, PATROCINADORES, BANNERS_PREMIUM,
 } from './data/config';
+import { useAuth } from './hooks/useAuth';
 import { useNowPlaying } from './hooks/useNowPlaying';
 import { useRadioConfig } from './hooks/useRadioConfig';
 import { useTheme } from './hooks/useTheme';
@@ -45,6 +46,10 @@ function App() {
 
   // Multi-tenant: carrega config da rádio pela API
   const { config: radioConfig, loading: configLoading, slug } = useRadioConfig();
+
+  // Sessão: usada só pra saber se quem está vendo é o dono da rádio.
+  // Para visitante sem login isto é lido do armazenamento local, sem custo.
+  const { user } = useAuth();
 
   // Termos de Uso e Política de Privacidade (links do rodapé)
   const pagina = params.get('pagina');
@@ -101,6 +106,8 @@ function App() {
   const [showAdmin, setShowAdmin]           = useState(false);
   // Notícia aberta. Fica no endereço (?noticia=ID) pra poder compartilhar.
   const [noticiaId, setNoticiaId]           = useState(() => params.get('noticia'));
+  // Notícia que o painel deve abrir já focada (vem do botão Editar)
+  const [editarNoticiaId, setEditarNoticiaId] = useState(null);
   const [darkMode, setDarkMode]             = useState(() => {
     return localStorage.getItem('darkMode') === 'true';
   });
@@ -207,6 +214,14 @@ function App() {
   const fecharNoticia = () => {
     setNoticiaId(null);
     trocaEndereco(null);
+  };
+
+  // Só o dono logado desta rádio vê o botão de editar na notícia.
+  const podeEditar = !!user && !!radioData.ownerId && user.id === radioData.ownerId;
+
+  const editarNoticia = (n) => {
+    setEditarNoticiaId(n.id);
+    setShowAdmin(true);
   };
 
   // Botão voltar do navegador fecha (ou reabre) a notícia
@@ -320,6 +335,7 @@ function App() {
               onVoltar={fecharNoticia}
               onAbrir={abrirNoticia}
               nomeRadio={radioData.nome}
+              onEditar={podeEditar ? editarNoticia : undefined}
             />
           ) : (
             <>
@@ -346,7 +362,14 @@ function App() {
       )}
 
       {/* ===== PAINEL ADMIN ===== */}
-      {showAdmin && <Admin onClose={() => setShowAdmin(false)} radioSlug={slug} plano={radioData.plano || 'free'} />}
+      {showAdmin && (
+        <Admin
+          onClose={() => { setShowAdmin(false); setEditarNoticiaId(null); }}
+          radioSlug={slug}
+          plano={radioData.plano || 'free'}
+          abrirNoticiaId={editarNoticiaId}
+        />
+      )}
 
       {/* ===== MARCA D'ÁGUA (plano grátis) ===== */}
       <MarcaDagua show={temFeature(radioData.plano || 'free', 'marcaDagua')} />

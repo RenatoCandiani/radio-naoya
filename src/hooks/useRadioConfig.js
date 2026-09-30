@@ -180,6 +180,10 @@ export function useRadioConfig() {
             patrocinadores: patFormatted,
             planosComerciais: planosComerciais || [],
             plano: radio.plano || 'free',
+            // Usado só para decidir se mostra o botão de editar ao dono logado.
+            // Não é segredo: a leitura da tabela já é pública, e quem manda de
+            // verdade é a regra do banco, não a tela.
+            ownerId: radio.owner_id || null,
           });
         }
       } catch (err) {

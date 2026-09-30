@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import { temFeature, planoNecessario } from '../lib/planos';
@@ -81,7 +81,7 @@ export function useAdminData(fallbackNoticias, fallbackProgramacao, fallbackPatr
 // ============================================================
 // PAINEL ADMIN COM AUTENTICAÇÃO REAL
 // ============================================================
-export function Admin({ onClose, radioSlug, plano = 'free' }) {
+export function Admin({ onClose, radioSlug, plano = 'free', abrirNoticiaId = null }) {
   const { user, loading: authLoading, signIn, signUp, signOut, error: authError } = useAuth();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
@@ -90,7 +90,8 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
   const [loginMsg, setLoginMsg] = useState('');
 
   // Admin state
-  const [aba, setAba] = useState('dashboard');
+  // Vindo do botão Editar da notícia, o painel já abre na aba certa
+  const [aba, setAba] = useState(abrirNoticiaId ? 'noticias' : 'dashboard');
   const [salvo, setSalvo] = useState(false);
   const [saving, setSaving] = useState(false);
   const [radioId, setRadioId] = useState(null);
@@ -104,6 +105,9 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
   // Prévia da notícia: qual está aberta e em qual das duas visões
   const [previaIdx, setPreviaIdx] = useState(null);
   const [previaVisao, setPreviaVisao] = useState('pagina'); // 'home' | 'pagina'
+  // Notícia que veio do botão Editar: rola até ela e destaca por um instante
+  const [noticiaFocada, setNoticiaFocada] = useState(null);
+  const refsNoticia = useRef({});
   const [banners, setBanners] = useState([]);
   const [radioInfo, setRadioInfo] = useState({});
   const [diaSel, setDiaSel] = useState(new Date().getDay());
@@ -162,7 +166,18 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
       .select('*')
       .eq('radio_id', radio.id)
       .order('created_at', { ascending: false });
-    if (nots) setNoticias(nots);
+    if (nots) {
+      setNoticias(nots);
+      // Veio do botão Editar: abre já na notícia que ele clicou, com a
+      // prévia aberta, pra ele reconhecer que é a mesma que estava lendo.
+      if (abrirNoticiaId) {
+        const i = nots.findIndex((n) => String(n.id) === String(abrirNoticiaId));
+        if (i >= 0) {
+          setPreviaIdx(i);
+          setNoticiaFocada(i);
+        }
+      }
+    }
 
     // Carrega patrocinadores
     const { data: pats } = await supabase
@@ -375,6 +390,16 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
 
     return publicUrl;
   };
+
+  // Rola até a notícia que veio do botão Editar, depois que ela renderizou
+  useEffect(() => {
+    if (noticiaFocada === null) return;
+    const el = refsNoticia.current[noticiaFocada];
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Tira o destaque depois da animação, senão fica marcado pra sempre
+    const t = setTimeout(() => setNoticiaFocada(null), 2400);
+    return () => clearTimeout(t);
+  }, [noticiaFocada, noticias.length]);
 
   // ---- Notícias helpers ----
   const updateNoticia = (idx, campo, valor) => {
@@ -1013,7 +1038,11 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
                 <button className="admin-btn-add" onClick={addNoticia}>+ Adicionar</button>
               </div>
               {noticias.map((n, idx) => (
-                <div key={idx} className="admin-card">
+                <div
+                  key={idx}
+                  ref={(el) => { refsNoticia.current[idx] = el; }}
+                  className={`admin-card${noticiaFocada === idx ? ' admin-card--focada' : ''}`}
+                >
                   <div className="admin-card-header">
                     <span className="admin-card-num">#{idx + 1}</span>
                     <label className="admin-destaque-label">

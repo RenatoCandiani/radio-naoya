@@ -2318,3 +2318,58 @@ body.dark-mode .admin-previa { border-color: #3a3a44; }
 body.dark-mode .admin-previa-topo { background: #26262e; border-bottom-color: #3a3a44; }
 body.dark-mode .admin-previa-aba { background: #1e1e24; border-color: #3a3a44; color: #bbb; }
 body.dark-mode .admin-previa-nota { background: #262019; border-top-color: #3a3325; color: #c6b48a; }
+
+/* ============================================================
+   BOTÃO EDITAR NA NOTÍCIA (só o dono logado vê)
+   ============================================================ */
+.noticia-linha-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+/* A etiqueta já tinha margem embaixo; dentro da linha quem cuida disso é o pai */
+.noticia-linha-topo .noticia-categoria { margin-bottom: 0; }
+
+.noticia-editar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid var(--cor-primaria);
+  color: var(--cor-primaria);
+  border-radius: 20px;
+  padding: 6px 15px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  margin-left: auto;
+  transition: all var(--transition);
+}
+
+.noticia-editar:hover {
+  background: var(--cor-primaria);
+  color: #fff;
+}
+
+body.dark-mode .noticia-editar { border-color: #6f9ede; color: #9ec2ee; }
+body.dark-mode .noticia-editar:hover { background: #6f9ede; color: #14141a; }
+
+/* Notícia aberta pelo botão Editar: pisca uma vez pra ele reconhecer qual é */
+.admin-card--focada {
+  animation: destacaCartao 2.2s ease-out 1;
+}
+
+@keyframes destacaCartao {
+  0%   { box-shadow: 0 0 0 3px var(--cor-primaria); }
+  70%  { box-shadow: 0 0 0 3px var(--cor-primaria); }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-card--focada { animation: none; box-shadow: 0 0 0 3px var(--cor-primaria); }
+}

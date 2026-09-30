@@ -15,7 +15,7 @@ export function dataFormatada(iso) {
   return `${d.getDate()} de ${MESES[d.getMonth()]}. de ${d.getFullYear()} · ${hora}h${min}`;
 }
 
-export function TabNoticia({ noticia, noticias = [], onVoltar, onAbrir, nomeRadio, modoPrevia = false }) {
+export function TabNoticia({ noticia, noticias = [], onVoltar, onAbrir, nomeRadio, modoPrevia = false, onEditar }) {
   if (!noticia) return null;
 
   // Texto em parágrafos. Sem conteúdo ainda, mostra o resumo pra não ficar vazio.
@@ -50,7 +50,20 @@ export function TabNoticia({ noticia, noticias = [], onVoltar, onAbrir, nomeRadi
             <img src={noticia.img} alt={noticia.titulo} className="noticia-img" />
           )}
 
-          {noticia.categoria && <span className="noticia-categoria">{noticia.categoria}</span>}
+          {/* A etiqueta de editoria e o botão de editar dividem a mesma linha.
+              O botão só existe para o dono logado (quem passa onEditar). */}
+          <div className="noticia-linha-topo">
+            {noticia.categoria && <span className="noticia-categoria">{noticia.categoria}</span>}
+            {!modoPrevia && onEditar && (
+              <button
+                className="noticia-editar"
+                onClick={() => onEditar(noticia)}
+                title="Editar esta notícia no painel"
+              >
+                ✏️ Editar
+              </button>
+            )}
+          </div>
           <h1 className="noticia-titulo">{noticia.titulo}</h1>
 
           <div className="noticia-meta">
