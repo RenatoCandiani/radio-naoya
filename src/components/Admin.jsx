@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import { temFeature, planoNecessario } from '../lib/planos';
 import { UpgradeBadge } from './UpgradeBadge';
+import { TabNoticia } from './TabNoticia';
 import {
   NOTICIAS as DEFAULT_NOTICIAS,
   PROGRAMACAO as DEFAULT_PROGRAMACAO,
@@ -11,6 +12,59 @@ import {
 } from '../data/config';
 
 const DIAS_LABEL = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+
+// ============================================================
+// PRÉVIA DA NOTÍCIA — o que o ouvinte vê
+// A prévia usa o MESMO componente da página real (TabNoticia). Se fosse uma
+// imitação, ela mentiria: mudaria o site e a prévia continuaria igual.
+// ============================================================
+
+// No painel o campo é img_url; na página é img. E notícia nova ainda não tem data.
+function paraPrevia(n) {
+  return {
+    id: n.id || 'previa',
+    titulo: n.titulo || '(sem título)',
+    resumo: n.resumo || '',
+    img: n.img_url || n.img || '',
+    conteudo: n.conteudo || '',
+    autor: n.autor || '',
+    categoria: n.categoria || '',
+    destaque: !!n.destaque,
+    created_at: n.created_at || new Date().toISOString(),
+  };
+}
+
+// Como a notícia aparece na página inicial: grande se for destaque,
+// cartão se não for. Usa as mesmas classes do site.
+function PreviaHome({ noticia }) {
+  const n = paraPrevia(noticia);
+
+  if (n.destaque) {
+    return (
+      <div className="hero-news" style={{ backgroundImage: `url('${n.img}')` }}>
+        <div className="hero-overlay">
+          <span className="hero-tag">DESTAQUE</span>
+          <h2 className="hero-titulo">{n.titulo}</h2>
+          <p className="hero-resumo">{n.resumo}</p>
+          <span className="hero-leia">Leia a notícia →</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="news-grid admin-previa-grid">
+      <article className="news-card">
+        {n.img && <img src={n.img} alt="" />}
+        <div className="news-card-body">
+          {n.categoria && <span className="news-card-cat">{n.categoria}</span>}
+          <h4>{n.titulo}</h4>
+          <p>{n.resumo}</p>
+        </div>
+      </article>
+    </div>
+  );
+}
 
 // ============================================================
 // Hook para carregar dados da rádio do Supabase
@@ -47,6 +101,9 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
   const [patrocinadores, setPatrocinadores] = useState([]);
   const [locutores, setLocutores] = useState([]);
   const [planosComerciais, setPlanosComerciais] = useState([]);
+  // Prévia da notícia: qual está aberta e em qual das duas visões
+  const [previaIdx, setPreviaIdx] = useState(null);
+  const [previaVisao, setPreviaVisao] = useState('pagina'); // 'home' | 'pagina'
   const [banners, setBanners] = useState([]);
   const [radioInfo, setRadioInfo] = useState({});
   const [diaSel, setDiaSel] = useState(new Date().getDay());
@@ -946,6 +1003,13 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
                       />
                       Destaque
                     </label>
+                    <button
+                      className={`admin-btn-previa${previaIdx === idx ? ' ativa' : ''}`}
+                      onClick={() => setPreviaIdx(previaIdx === idx ? null : idx)}
+                      title="Ver como esta notícia aparece para o ouvinte"
+                    >
+                      {previaIdx === idx ? '✕ Fechar prévia' : '👁 Ver prévia'}
+                    </button>
                     <button className="admin-btn-remove" onClick={() => removeNoticia(idx)}>✕</button>
                   </div>
                   <label className="admin-field-label">Título</label>
@@ -1019,6 +1083,47 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
                   </div>
                   {(n.img_url || n.img) && (
                     <img src={n.img_url || n.img} alt="preview" className="admin-img-preview" />
+                  )}
+
+                  {/* ===== PRÉVIA: como o ouvinte vê ===== */}
+                  {previaIdx === idx && (
+                    <div className="admin-previa">
+                      <div className="admin-previa-topo">
+                        <span className="admin-previa-selo">👁 Como o ouvinte vê</span>
+                        <div className="admin-previa-abas">
+                          <button
+                            className={`admin-previa-aba${previaVisao === 'home' ? ' ativa' : ''}`}
+                            onClick={() => setPreviaVisao('home')}
+                          >
+                            Na página inicial
+                          </button>
+                          <button
+                            className={`admin-previa-aba${previaVisao === 'pagina' ? ' ativa' : ''}`}
+                            onClick={() => setPreviaVisao('pagina')}
+                          >
+                            Notícia aberta
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="admin-previa-palco">
+                        {previaVisao === 'home' ? (
+                          <PreviaHome noticia={n} />
+                        ) : (
+                          <TabNoticia noticia={paraPrevia(n)} noticias={[]} modoPrevia />
+                        )}
+                      </div>
+
+                      <p className="admin-previa-nota">
+                        {previaVisao === 'home'
+                          ? (n.destaque
+                              ? 'Marcada como destaque: aparece grande no topo da página inicial.'
+                              : 'Sem destaque: aparece como cartão na lista de últimas notícias.')
+                          : 'É esta a página que abre quando o ouvinte clica na manchete.'}
+                        {' '}Ainda não salvou? A prévia já mostra o que você digitou, mas o
+                        ouvinte só vê depois que você clicar em Salvar.
+                      </p>
+                    </div>
                   )}
                 </div>
               ))}

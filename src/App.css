@@ -2209,3 +2209,112 @@ body.dark-mode .noticia-corpo p,
 body.dark-mode .noticia-linhafina { color: #bbb; }
 body.dark-mode .noticia-meta { border-bottom-color: #33333c; }
 body.dark-mode .noticia-outra { border-bottom-color: #33333c; }
+
+/* ============================================================
+   PRÉVIA DA NOTÍCIA DENTRO DO PAINEL
+   O objetivo é o contraste: a área de edição é formulário cinza,
+   a prévia é claramente "o site", com moldura e selo.
+   ============================================================ */
+.admin-btn-previa {
+  background: none;
+  border: 1px solid var(--cor-primaria);
+  color: var(--cor-primaria);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-left: auto;
+  margin-right: 8px;
+  white-space: nowrap;
+  transition: all var(--transition);
+}
+.admin-btn-previa:hover { background: rgba(0, 0, 0, 0.04); }
+.admin-btn-previa.ativa {
+  background: var(--cor-primaria);
+  color: #fff;
+}
+
+.admin-previa {
+  margin-top: 18px;
+  border: 2px dashed #c9d4e0;
+  border-radius: 12px;
+  background: var(--cor-fundo, #F0F4F8);
+  overflow: hidden;
+}
+
+.admin-previa-topo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #e8eef5;
+  border-bottom: 1px solid #d5dfe9;
+}
+
+.admin-previa-selo {
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #4a6b8a;
+}
+
+.admin-previa-abas { display: flex; gap: 6px; }
+
+.admin-previa-aba {
+  background: #fff;
+  border: 1px solid #cfd9e4;
+  color: #5c6b7a;
+  border-radius: 16px;
+  padding: 5px 13px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.admin-previa-aba:hover { border-color: var(--cor-primaria); }
+.admin-previa-aba.ativa {
+  background: var(--cor-primaria);
+  border-color: var(--cor-primaria);
+  color: #fff;
+}
+
+/* O palco é o "site" dentro do painel */
+.admin-previa-palco {
+  padding: 16px;
+  max-height: 460px;
+  overflow-y: auto;
+}
+
+/* A página da notícia dentro do palco não tem espaço pra coluna lateral */
+.admin-previa-palco .noticia-layout { grid-template-columns: 1fr; }
+.admin-previa-palco .noticia-titulo { font-size: 1.35rem; }
+.admin-previa-palco .noticia-img { max-height: 200px; }
+
+/* Botão de compartilhar na prévia é só ilustração, não clica */
+.noticia-compartilhar--previa {
+  display: inline-block;
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* Um cartão sozinho não deve esticar na largura toda da grade */
+.admin-previa-grid { grid-template-columns: minmax(0, 260px); }
+
+.admin-previa-nota {
+  margin: 0;
+  padding: 11px 14px;
+  background: #fffdf5;
+  border-top: 1px solid #ece4cf;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: #7a6a45;
+}
+
+body.dark-mode .admin-previa { border-color: #3a3a44; }
+body.dark-mode .admin-previa-topo { background: #26262e; border-bottom-color: #3a3a44; }
+body.dark-mode .admin-previa-aba { background: #1e1e24; border-color: #3a3a44; color: #bbb; }
+body.dark-mode .admin-previa-nota { background: #262019; border-top-color: #3a3325; color: #c6b48a; }

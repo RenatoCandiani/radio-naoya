@@ -15,7 +15,7 @@ export function dataFormatada(iso) {
   return `${d.getDate()} de ${MESES[d.getMonth()]}. de ${d.getFullYear()} · ${hora}h${min}`;
 }
 
-export function TabNoticia({ noticia, noticias = [], onVoltar, onAbrir, nomeRadio }) {
+export function TabNoticia({ noticia, noticias = [], onVoltar, onAbrir, nomeRadio, modoPrevia = false }) {
   if (!noticia) return null;
 
   // Texto em parágrafos. Sem conteúdo ainda, mostra o resumo pra não ficar vazio.
@@ -39,7 +39,10 @@ export function TabNoticia({ noticia, noticias = [], onVoltar, onAbrir, nomeRadi
 
   return (
     <div className="animate-fade-in">
-      <button className="noticia-voltar" onClick={onVoltar}>← Voltar para as notícias</button>
+      {/* Na prévia do painel, botão de voltar não faz sentido: não há de onde voltar. */}
+      {!modoPrevia && (
+        <button className="noticia-voltar" onClick={onVoltar}>← Voltar para as notícias</button>
+      )}
 
       <div className="noticia-layout">
         <article className="noticia-principal">
@@ -68,9 +71,15 @@ export function TabNoticia({ noticia, noticias = [], onVoltar, onAbrir, nomeRadi
             )}
           </div>
 
-          <button className="noticia-compartilhar" onClick={compartilhar}>
-            Compartilhar esta notícia
-          </button>
+          {modoPrevia ? (
+            <span className="noticia-compartilhar noticia-compartilhar--previa">
+              Compartilhar esta notícia
+            </span>
+          ) : (
+            <button className="noticia-compartilhar" onClick={compartilhar}>
+              Compartilhar esta notícia
+            </button>
+          )}
         </article>
 
         {outras.length > 0 && (
