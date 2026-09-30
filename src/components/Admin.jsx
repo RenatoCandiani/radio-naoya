@@ -242,20 +242,41 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
         await supabase.from('programacao').insert(progInserts);
       }
 
-      // Salva notícias — deleta e reinsere
-      await supabase.from('noticias').delete().eq('radio_id', radioId);
-      if (noticias.length > 0) {
+      // Salva notícias PRESERVANDO O ID de quem já existe.
+      // Antes isto apagava tudo e regravava, o que gerava ids novos e MATAVA
+      // o link já compartilhado (?noticia=ID). Agora: apaga só o que o dono
+      // removeu, atualiza o que já existia e insere o que é novo.
+      const campos = (n) => ({
+        titulo: n.titulo,
+        resumo: n.resumo || '',
+        img_url: n.img_url || n.img || '',
+        destaque: !!n.destaque,
+        conteudo: n.conteudo || '',
+        autor: n.autor || '',
+        categoria: n.categoria || '',
+      });
+
+      const { data: noticiasNoBanco } = await supabase
+        .from('noticias').select('id').eq('radio_id', radioId);
+      const idsNaTela = new Set(noticias.filter((n) => n.id).map((n) => String(n.id)));
+      const aApagar = (noticiasNoBanco || [])
+        .filter((r) => !idsNaTela.has(String(r.id)))
+        .map((r) => r.id);
+      if (aApagar.length > 0) {
+        await supabase.from('noticias').delete().in('id', aApagar);
+      }
+
+      // Atualiza as que já existiam (mantém id e created_at, então o link
+      // continua valendo e a ordem na home não embaralha)
+      for (const n of noticias.filter((x) => x.id)) {
+        await supabase.from('noticias').update(campos(n)).eq('id', n.id);
+      }
+
+      // Insere as novas
+      const noticiasNovas = noticias.filter((n) => !n.id);
+      if (noticiasNovas.length > 0) {
         await supabase.from('noticias').insert(
-          noticias.map((n) => ({
-            radio_id: radioId,
-            titulo: n.titulo,
-            resumo: n.resumo || '',
-            img_url: n.img_url || n.img || '',
-            destaque: !!n.destaque,
-            conteudo: n.conteudo || '',
-            autor: n.autor || '',
-            categoria: n.categoria || '',
-          }))
+          noticiasNovas.map((n) => ({ radio_id: radioId, ...campos(n) }))
         );
       }
 
@@ -1120,8 +1141,9 @@ export function Admin({ onClose, radioSlug, plano = 'free' }) {
                               ? 'Marcada como destaque: aparece grande no topo da página inicial.'
                               : 'Sem destaque: aparece como cartão na lista de últimas notícias.')
                           : 'É esta a página que abre quando o ouvinte clica na manchete.'}
-                        {' '}Ainda não salvou? A prévia já mostra o que você digitou, mas o
-                        ouvinte só vê depois que você clicar em Salvar.
+                        {' '}A prévia já mostra o que você digitou; o ouvinte vê depois que
+                        você clicar em Salvar. E pode corrigir quando quiser, mesmo depois
+                        de publicada: o link que você já compartilhou continua valendo.
                       </p>
                     </div>
                   )}
