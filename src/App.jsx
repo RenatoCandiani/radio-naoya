@@ -17,6 +17,7 @@ import { useAdminData, Admin } from './components/Admin';
 import { Sidebar } from './components/Sidebar';
 import { StickyPlayer } from './components/StickyPlayer';
 import { MarcaDagua } from './components/MarcaDagua';
+import { BarraDono } from './components/BarraDono';
 import { LandingPage } from './components/LandingPage';
 import { Termos, Privacidade } from './components/PaginaLegal';
 import { TabHome } from './components/TabHome';
@@ -247,13 +248,47 @@ function App() {
     );
   }
 
-  // Template moderno
+  // Template moderno.
+  // Antes isto retornava só o template, então o painel nunca era montado:
+  // neste template o dono não tinha COMO editar o site. Agora a faixa do dono,
+  // a porta de entrada e o painel vêm junto.
   if (template === 'moderno') {
-    return <TemplateModerno radioData={radioData} streams={streams} nowPlaying={nowPlaying} adminData={adminData} />;
+    return (
+      <>
+        {podeEditar && (
+          <BarraDono nomeRadio={radioData.nome} onAbrirPainel={() => setShowAdmin(true)} />
+        )}
+        <TemplateModerno radioData={radioData} streams={streams} nowPlaying={nowPlaying} adminData={adminData} />
+        {!podeEditar && (
+          <button
+            className="painel-flutuante"
+            onClick={() => setShowAdmin(true)}
+            aria-label="Entrar no painel da rádio"
+            title="Entrar no painel da rádio"
+          >
+            ⚙️ Painel
+          </button>
+        )}
+        {showAdmin && (
+          <Admin
+            onClose={() => { setShowAdmin(false); setEditarNoticiaId(null); }}
+            radioSlug={slug}
+            plano={radioData.plano || 'free'}
+            abrirNoticiaId={editarNoticiaId}
+          />
+        )}
+        <MarcaDagua show={temFeature(radioData.plano || 'free', 'marcaDagua')} />
+      </>
+    );
   }
 
   return (
     <div className="App">
+
+      {/* Faixa do dono: a entrada explícita pra editar. Só ele vê. */}
+      {podeEditar && (
+        <BarraDono nomeRadio={radioData.nome} onAbrirPainel={() => setShowAdmin(true)} />
+      )}
 
       {/* ===== HEADER ===== */}
       <header className="header">
@@ -280,15 +315,19 @@ function App() {
           >
             {darkMode ? '☀️' : '🌙'}
           </button>
-          {/* Botão admin */}
+          {/* Entrada do painel. Para o dono logado, quem cumpre esse papel é a
+              faixa do topo, que diz "Editar meu site" com palavras. Aqui fica
+              só a porta de entrada de quem ainda não entrou. */}
+          {!podeEditar && (
           <button
             className="admin-trigger"
             onClick={() => setShowAdmin(true)}
-            aria-label="Abrir painel administrativo"
-            title="Admin"
+            aria-label="Entrar no painel da rádio"
+            title="Entrar no painel da rádio"
           >
-            ⚙️
+            ⚙️ <span className="admin-trigger-texto">Painel</span>
           </button>
+          )}
         </div>
       </header>
 
