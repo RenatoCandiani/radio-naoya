@@ -109,7 +109,7 @@ export function LandingPage() {
       <section className="landing-video" id="video">
         <h2>Veja o site de uma rádio funcionando</h2>
         <p className="landing-video-sub">
-          Um minuto e dezessete segundos mostrando o site da Rádio Bem-Te-Vi: o player no ar,
+          Um minuto e dezesseis segundos mostrando o site da Rádio Bem-Te-Vi: o player no ar,
           as notícias da cidade na entrada, a grade da semana, a equipe de locutores e o
           painel onde a própria rádio troca as cores do site e salva.
         </p>
