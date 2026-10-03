@@ -105,6 +105,33 @@ export function LandingPage() {
         </section>
       )}
 
+      {/* Vídeo de divulgação */}
+      <section className="landing-video" id="video">
+        <h2>Veja o site de uma rádio funcionando</h2>
+        <p className="landing-video-sub">
+          Um minuto e dezessete segundos mostrando o site da Rádio Bem-Te-Vi: o player no ar,
+          as notícias da cidade na entrada, a grade da semana, a equipe de locutores e o
+          painel onde a própria rádio troca as cores do site e salva.
+        </p>
+        <div className="landing-video-moldura">
+          <video
+            className="landing-video-player"
+            src="/video-divulgacao.mp4"
+            poster="/video-divulgacao-poster.jpg"
+            controls
+            preload="metadata"
+            playsInline
+            width="1280"
+            height="720"
+            aria-label="Vídeo de demonstração do Rádio Naoya: o site da Rádio Bem-Te-Vi com player ao vivo, notícias, programação da semana, locutores e o painel de administração"
+          />
+        </div>
+        <p className="landing-video-nota">
+          O vídeo não tem narração falada: é música instrumental com legendas em português
+          escritas na própria imagem. O parágrafo acima resume o que ele mostra.
+        </p>
+      </section>
+
       {/* Features */}
       <section className="landing-section" id="recursos">
         <h2>Tudo que sua rádio precisa</h2>

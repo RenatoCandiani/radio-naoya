@@ -49,6 +49,12 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Ignora o vídeo de divulgação: são 10 MB e o player pede por Range,
+  // cujo 206 o cache não aceita
+  if (event.request.url.includes('video-divulgacao')) {
+    return;
+  }
+
   event.respondWith(
     fetch(event.request)
       .then((response) => {
