@@ -94,12 +94,12 @@ export function LandingPage() {
       {showDemo && (
         <section className="landing-demo">
           <div className="landing-demo-header">
-            <h2>🎵 Demo — Rádio Marajá AM 660</h2>
+            <h2>🎵 Demo — Rádio Bem-Te-Vi AM 1130</h2>
             <button onClick={() => setShowDemo(false)} className="landing-demo-close">✕ Fechar</button>
           </div>
           <iframe
-            src="/?radio=maraja"
-            title="Demo Rádio Naoya - Rádio Marajá"
+            src="/?radio=bemtevi"
+            title="Demo Rádio Naoya - Rádio Bem-Te-Vi"
             className="landing-demo-iframe"
           />
         </section>
