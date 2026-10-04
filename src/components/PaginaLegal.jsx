@@ -11,6 +11,7 @@
 
 const WHATSAPP = '5511960758318';
 const WHATSAPP_VISIVEL = '(11) 96075-8318';
+const EMAIL = 'naoyaradio@gmail.com';
 const ATUALIZADO = '28 de setembro de 2026';
 
 function Cabecalho({ titulo, onVoltar }) {
@@ -37,7 +38,8 @@ function Aviso() {
         Qualquer dúvida, pedido ou reclamação:{' '}
         <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noreferrer">
           WhatsApp {WHATSAPP_VISIVEL}
-        </a>.
+        </a>{' '}
+        ou <a href={`mailto:${EMAIL}`}>{EMAIL}</a>.
       </p>
     </div>
   );
@@ -138,7 +140,8 @@ export function Termos({ onVoltar }) {
       <p>
         <strong>Arrependimento:</strong> se você assinou e desistiu em até 7
         dias, tem direito a devolução integral, conforme o artigo 49 do Código
-        de Defesa do Consumidor. Basta pedir pelo WhatsApp.
+        de Defesa do Consumidor. Basta pedir pelo WhatsApp ou por{' '}
+        <a href={`mailto:${EMAIL}`}>e-mail</a>.
       </p>
       <p>
         Se um dia os preços mudarem, quem já é assinante é avisado com pelo menos
@@ -173,8 +176,12 @@ export function Termos({ onVoltar }) {
 
       <h2>6. Encerramento</h2>
       <p>
-        Você pode encerrar a conta quando quiser, pelo WhatsApp do suporte, e
-        pedir a exclusão dos seus dados.
+        Você pode encerrar a conta quando quiser, e pedir a exclusão dos seus
+        dados. Peça por <a href={`mailto:${EMAIL}`}>{EMAIL}</a>, que deixa
+        registro, ou pelo{' '}
+        <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noreferrer">
+          WhatsApp do suporte
+        </a>.
       </p>
       <p>
         Podemos suspender uma conta que descumpra estes termos, especialmente nos
@@ -202,7 +209,8 @@ export function Termos({ onVoltar }) {
 
       <div className="legal-rodape-nota">
         Dúvida sobre qualquer ponto acima? Pergunte pelo{' '}
-        <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noreferrer">WhatsApp</a>.
+        <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noreferrer">WhatsApp</a>{' '}
+        ou por <a href={`mailto:${EMAIL}`}>e-mail</a>.
         É melhor perguntar antes de assinar.
       </div>
     </div>
@@ -308,7 +316,8 @@ export function Privacidade({ onVoltar }) {
         <li>Retirar o consentimento, o que encerra o uso do serviço.</li>
       </ul>
       <p>
-        Para exercer qualquer um deles, é só pedir pelo{' '}
+        Para exercer qualquer um deles, é só pedir por{' '}
+        <a href={`mailto:${EMAIL}`}>{EMAIL}</a>, que deixa registro, ou pelo{' '}
         <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noreferrer">
           WhatsApp {WHATSAPP_VISIVEL}
         </a>. A resposta vem em até 15 dias.
@@ -344,7 +353,7 @@ export function Privacidade({ onVoltar }) {
       <div className="legal-rodape-nota">
         Quer saber exatamente que dados seus estão guardados? Pergunte pelo{' '}
         <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noreferrer">WhatsApp</a>{' '}
-        que eu te mando.
+        ou por <a href={`mailto:${EMAIL}`}>e-mail</a> que eu te mando.
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import { PLANOS } from '../lib/planos';
 // Contato do suporte (o próprio desenvolvedor)
 const SUPORTE_WHATSAPP = '5511960758318';
 const SUPORTE_WHATSAPP_VISIVEL = '(11) 96075-8318';
+const SUPORTE_EMAIL = 'naoyaradio@gmail.com';
 
 const FEATURES_LISTA = [
   { feature: 'Site completo com player', free: true, basic: true, premium: true },
@@ -359,6 +360,9 @@ export function LandingPage() {
             <h4>Contato e ajuda</h4>
             <a href={`https://wa.me/${SUPORTE_WHATSAPP}`} target="_blank" rel="noreferrer">
               WhatsApp {SUPORTE_WHATSAPP_VISIVEL}
+            </a>
+            <a href={`mailto:${SUPORTE_EMAIL}`}>
+              E-mail {SUPORTE_EMAIL}
             </a>
             <span className="landing-footer-nota">
               Resposta assim que possível. Não é atendimento 24h.
