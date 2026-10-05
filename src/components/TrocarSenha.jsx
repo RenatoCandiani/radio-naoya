@@ -52,6 +52,7 @@ export function TrocarSenha({ modo }) {
   const [linkMorto, setLinkMorto] = useState(modo === 'expirado');
 
   const campoSenhaRef = useRef(null);
+  const tituloRef = useRef(null);
 
   // Tira o token da barra de endereço e do histórico assim que a tela monta.
   useEffect(() => {
@@ -60,16 +61,6 @@ export function TrocarSenha({ modo }) {
 
   const fechar = () => { window.location.href = '/'; };
 
-  // Esc fecha, como em qualquer sobreposição. Enquanto salva, não: interromper aí deixaria a
-  // pessoa sem saber se a senha trocou.
-  useEffect(() => {
-    const aoTeclar = (e) => {
-      if (e.key === 'Escape' && !salvando) fechar();
-    };
-    window.addEventListener('keydown', aoTeclar);
-    return () => window.removeEventListener('keydown', aoTeclar);
-  }, [salvando]);
-
   let vista;
   if (pronto) vista = 'sucesso';
   else if (linkMorto) vista = 'expirado';
@@ -77,10 +68,30 @@ export function TrocarSenha({ modo }) {
   else if (!user) vista = 'expirado';   // o token não validou: furado, velho ou já usado
   else vista = 'formulario';
 
+  // ATENÇÃO: o ✕ e o Esc somem de propósito enquanto o formulário está na tela — não é
+  // esquecimento. O token chega no fragmento do endereço e `limparEnderecoRecuperacao()`
+  // apaga esse fragmento assim que a tela monta. Depois disso, sair daqui joga o pedido
+  // fora: não tem como voltar, só pedindo outro e-mail. Nas vistas de sucesso e de link
+  // morto não existe nada a perder, então as duas saídas voltam.
+  const podeFechar = vista !== 'formulario';
+
+  // Esc fecha, como em qualquer sobreposição. Enquanto salva, não: interromper aí deixaria a
+  // pessoa sem saber se a senha trocou.
+  useEffect(() => {
+    const aoTeclar = (e) => {
+      if (e.key === 'Escape' && !salvando && podeFechar) fechar();
+    };
+    window.addEventListener('keydown', aoTeclar);
+    return () => window.removeEventListener('keydown', aoTeclar);
+  }, [salvando, podeFechar]);
+
   // O foco vai pro primeiro campo quando o formulário aparece. Não é no autoFocus porque o
-  // formulário não é a primeira vista: antes dele passa o "Conferindo seu link".
+  // formulário não é a primeira vista: antes dele passa o "Conferindo seu link". Nas vistas
+  // sem campo o foco vai pro título, senão quem usa teclado ou leitor de tela fica com o
+  // foco num botão que acabou de sumir.
   useEffect(() => {
     if (vista === 'formulario') campoSenhaRef.current?.focus();
+    else if (vista === 'sucesso' || vista === 'expirado') tituloRef.current?.focus();
   }, [vista]);
 
   const aoEnviar = async (e) => {
@@ -99,9 +110,25 @@ export function TrocarSenha({ modo }) {
 
     setErro('');
     setSalvando(true);
-    const { error } = await supabase.auth.updateUser({ password: senha });
+
+    // O auth-js devolve `{ error }` pros erros dele — inclusive rede caindo, que ele
+    // embrulha em AuthRetryableFetchError. Mas o que NÃO é AuthError ele relança: a trava
+    // do navegador (navigator.locks, pedida fora do try do updateUser, usada quando outra
+    // aba mexe na sessão) vem por aí. Sem este try/catch essa rejeição pulava o
+    // setSalvando(false) e o botão ficava preso em "Salvando...", desabilitado e sem
+    // mensagem. `traduzErro()` sem argumento é a mensagem genérica que já existe aqui.
+    // Não se manda pra vista de link morto: rejeição assim não diz nada sobre o link.
+    let resposta;
+    try {
+      resposta = await supabase.auth.updateUser({ password: senha });
+    } catch {
+      setSalvando(false);
+      setErro(traduzErro());
+      return;
+    }
     setSalvando(false);
 
+    const { error } = resposta;
     if (error) {
       if (ehLinkMorto(error)) setLinkMorto(true);
       else setErro(traduzErro(error.code));
@@ -116,18 +143,30 @@ export function TrocarSenha({ modo }) {
     // ganha um atalho pro site dela. Leitura de `radios` é pública por policy.
     // `.limit(1)` e não `.single()`: rádio criada pela landing fica com owner_id vazia até o
     // primeiro login no painel, e `single()` trataria "nenhuma linha" como erro.
-    const { data } = await supabase
-      .from('radios')
-      .select('slug')
-      .eq('owner_id', user.id)
-      .limit(1);
-    if (data && data[0] && data[0].slug) setSlug(data[0].slug);
+    //
+    // Esta consulta roda DEPOIS do sucesso, com a tela de "Senha trocada" já na frente da
+    // pessoa. Se ela falhar — erro do PostgREST ou rejeição de rede — não há nada a avisar:
+    // o `slug` fica null e a vista mostra o caminho pelo Painel, que já está implementado.
+    // O try/catch está aqui só pra isso não virar rejeição solta no console.
+    try {
+      const { data, error: erroSlug } = await supabase
+        .from('radios')
+        .select('slug')
+        .eq('owner_id', user.id)
+        .limit(1);
+      if (!erroSlug && data && data[0] && data[0].slug) setSlug(data[0].slug);
+    } catch {
+      // Sem ação: segue pro fallback "Abra o site da sua rádio e clique em Painel".
+    }
   };
 
   return (
     <div className="admin-overlay">
       <div className="admin-login">
-        <button className="admin-close" onClick={fechar} aria-label="Fechar" title="Fechar">✕</button>
+        {/* Só nas vistas em que fechar não custa nada. Ver o comentário do `podeFechar`. */}
+        {podeFechar && (
+          <button className="admin-close" onClick={fechar} aria-label="Fechar" title="Fechar">✕</button>
+        )}
 
         {vista === 'conferindo' && (
           <>
@@ -138,13 +177,16 @@ export function TrocarSenha({ modo }) {
 
         {vista === 'expirado' && (
           <>
-            <h2>Esse link não vale mais</h2>
+            {/* Texto genérico de propósito: o Supabase não manda `type` no redirecionamento
+                de erro, então link de confirmação de cadastro vencido cai nesta mesma vista.
+                Falar em senha aqui mentiria pra metade de quem chega. Critério pra conferir:
+                a palavra "senha" não aparece em nenhum lugar desta vista. */}
+            <h2 ref={tituloRef} tabIndex={-1}>Esse link não vale mais</h2>
             <p role="status" aria-live="polite">
-              Ele expirou ou já foi usado. Nada mudou na sua senha atual.
+              Ele expirou ou já foi usado. Nada mudou na sua conta.
             </p>
             <p>
-              Pra pedir outro: abra o site da sua rádio, clique em Painel, digite seu e-mail e
-              use "Esqueci minha senha".
+              Pra pedir outro: abra o site da sua rádio e clique em Painel.
             </p>
             <button className="admin-btn-link" onClick={fechar}>Voltar para o início</button>
           </>
@@ -206,7 +248,7 @@ export function TrocarSenha({ modo }) {
 
         {vista === 'sucesso' && (
           <>
-            <h2>Senha trocada</h2>
+            <h2 ref={tituloRef} tabIndex={-1}>Senha trocada</h2>
             <p role="status" aria-live="polite">
               Sua senha nova já está valendo. Use ela na próxima vez que entrar no painel.
             </p>
