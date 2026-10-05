@@ -111,6 +111,9 @@ export function Admin({ onClose, radioSlug, plano = 'free', abrirNoticiaId = nul
   const [banners, setBanners] = useState([]);
   const [radioInfo, setRadioInfo] = useState({});
   const [diaSel, setDiaSel] = useState(new Date().getDay());
+  // Rádio sem dono que não aceitou se vincular a esta conta: o painel abre (a leitura é
+  // pública) mas nada vai salvar. Melhor dizer isso do que deixar falhar em silêncio.
+  const [vinculoFalhou, setVinculoFalhou] = useState(false);
 
   // Carrega dados da rádio quando logado
   useEffect(() => {
@@ -120,6 +123,7 @@ export function Admin({ onClose, radioSlug, plano = 'free', abrirNoticiaId = nul
 
   async function loadRadioData() {
     const slug = radioSlug || 'maraja';
+    setVinculoFalhou(false);
 
     // Busca rádio
     const { data: radio } = await supabase
@@ -132,9 +136,20 @@ export function Admin({ onClose, radioSlug, plano = 'free', abrirNoticiaId = nul
     setRadioId(radio.id);
     setRadioInfo(radio);
 
-    // Se a rádio não tem owner, vincula ao usuário logado
+    // Se a rádio não tem owner, vincula ao usuário logado. A policy do banco só deixa
+    // passar quem está logado com o e-mail usado no cadastro da rádio.
+    // O `.select('id')` NÃO é enfeite: policy que barra pelo USING não devolve erro,
+    // devolve ZERO linhas com `error: null`. Sem ele não existe como saber que falhou, e a
+    // tarja de aviso nunca apareceria.
+    // O hash do e-mail sai no mesmo UPDATE: cumprido o papel dele, não precisa continuar
+    // numa tabela de leitura pública.
     if (!radio.owner_id && user) {
-      await supabase.from('radios').update({ owner_id: user.id }).eq('id', radio.id);
+      const { data: vinculada, error: erroVinculo } = await supabase
+        .from('radios')
+        .update({ owner_id: user.id, pending_owner_email_hash: null })
+        .eq('id', radio.id)
+        .select('id');
+      setVinculoFalhou(!!erroVinculo || !vinculada || vinculada.length === 0);
     }
 
     // Carrega programação
@@ -586,6 +601,22 @@ export function Admin({ onClose, radioSlug, plano = 'free', abrirNoticiaId = nul
 
         {/* Conteúdo */}
         <div className="admin-conteudo">
+
+          {/* O vínculo de dono não passou. O painel abre e mostra os dados porque a leitura
+              é pública, mas nenhuma edição vai salvar. Fica em qualquer aba, de propósito. */}
+          {vinculoFalhou && (
+            <div
+              className="admin-card"
+              role="alert"
+              style={{ borderColor: '#e53935', background: '#fdecea', marginBottom: 14 }}
+            >
+              <strong>Esta rádio não é desta conta.</strong>
+              <p style={{ margin: '6px 0 0' }}>
+                Ela foi cadastrada com outro e-mail. Saia aqui no 🚪 e entre com o e-mail que
+                você usou pra criar a rádio. Enquanto isso, o que você mudar aqui não vai salvar.
+              </p>
+            </div>
+          )}
 
           {/* ===== DASHBOARD ===== */}
           {aba === 'dashboard' && (

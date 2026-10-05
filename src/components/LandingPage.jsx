@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { PLANOS } from '../lib/planos';
+import { hashDonoPendente } from '../lib/donoPendente';
 
 // Contato do suporte (o próprio desenvolvedor)
 const SUPORTE_WHATSAPP = '5511960758318';
@@ -45,10 +46,17 @@ export function LandingPage() {
       const { data: authData, error: authErr } = await supabase.auth.signUp({ email, password: senha });
       if (authErr) throw new Error(authErr.message);
 
+      // Marca de quem está criando. Sem ela, qualquer pessoa logada que abra a rádio e
+      // clique em Painel antes do dono vira dona (a policy só exigia owner_id vazia).
+      // É o hash do e-mail, não o e-mail: esta tabela tem leitura pública.
+      // Ver src/lib/donoPendente.js e supabase-fix-vinculo-dono.sql.
+      const hashDono = await hashDonoPendente(email);
+
       // 2. Cria a rádio (sem owner_id — será vinculado no primeiro login)
       const { error: radioErr } = await supabase.from('radios').insert({
         slug: safeSlug,
         nome: nomeRadio,
+        pending_owner_email_hash: hashDono,
         plano: 'free',
         tema: { corPrimaria: '#1565C0', corSecundaria: '#0D47A1', corFundo: '#F0F4F8', corCards: '#ffffff', corTexto: '#333333' },
         streams: [],
