@@ -28,6 +28,8 @@ import { TabContatos } from './components/TabContatos';
 import { TabLocutores } from './components/TabLocutores';
 import { TabComercial } from './components/TabComercial';
 import { TemplateModerno } from './templates/Moderno';
+import { TrocarSenha } from './components/TrocarSenha';
+import { recuperacaoSenha } from './lib/recuperacaoSenha';
 
 const TABS = [
   { id: 'home',        label: 'Início' },
@@ -39,6 +41,18 @@ const TABS = [
 ];
 
 function App() {
+  // Voltando do e-mail de "redefinir senha": esta tela vem antes de tudo.
+  // Tem que ser o primeiro caminho de renderização porque o Site URL do Supabase é único e
+  // global: a pessoa cai onde o Supabase manda (normalmente a raiz, que mostra a landing) e o
+  // pedido não pode se perder em nenhuma das telas — landing, site clássico, template moderno
+  // ou a tela de "Carregando...". Pendurar em cada return é o formato de erro que já aconteceu
+  // com o painel e a marca d'água no moderno.
+  // O valor vem de uma constante de módulo, lida do endereço antes do primeiro render: este if
+  // responde igual em toda renderização, então a ordem dos hooks abaixo não muda.
+  if (recuperacaoSenha.modo) {
+    return <TrocarSenha modo={recuperacaoSenha.modo} />;
+  }
+
   // Detecta se deve mostrar a landing page
   const params = new URLSearchParams(window.location.search);
   const hostname = window.location.hostname;
